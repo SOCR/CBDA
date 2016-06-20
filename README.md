@@ -1,5 +1,5 @@
 # CBDA
-Compressive Big Data Analytics (CBDA)
+Compressive Big Data Analytics (CBDA)  
 
 The theoretical foundations of Big Data Science are not fully developed, yet. 
 The CBDA project investigates a new Big Data theory for high-throughput analytics and model-free Inference. 
