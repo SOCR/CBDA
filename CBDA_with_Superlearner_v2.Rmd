@@ -1,0 +1,376 @@
+---
+title: "CBDA with SuperLearner"
+author: "Simeone Marino and Ivo Dinov"
+date: "June 13, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This is a R Markdown document describing the first steps of **Compressive Big Data Analytics-CBDA** implementation using the *SuperLearner-SL* prediction function. This document describes the *prediction module* of CBDA. The *estimation module* will depend on the results of the *prediction module* and it will be briefly addressed at the end of the document. 
+A general flowchart of the many steps involved in the **CBDA-SL** are shown in Figure 1. Typically Steps 1-3 are data-dependent.
+[COMMENT: I need to revise Fig. 1: i) move Imputation from Step 3 into the SL-loop, between Step 4 and 5. ii) Add a new step between Step 4 and 5 that calls for Imputation and Normalization]
+
+
+![**Figure 1:** CBDA-SL flowchart](CBDA-flowchart-v2.png)
+
+
+I embedded the R code chunks with all the comments below. The dataset that I used in this example is attached separately as a text file (i.e., NeuroIm1.txt).
+
+```{r STEP 1, echo=TRUE, message=FALSE, warning=FALSE}
+# Load a session
+#load("~/Documents/NIH-grant/SOCR/CBDA_v0.RData")
+
+# Set the working directory
+#setwd("~/R")
+setwd("~/Documents/NIH-grant/SOCR")
+
+## STEP 1 - DATA CLEANING
+## This is just an example with the MRI dataset "NeuroIm1.txt"
+NeuroIm1 = read.table("NeuroIm1.txt", header = TRUE)
+
+# Delete the last 3 columns from the big matrix NeurIm1 ["ROI","Measure","Value"]
+# and store the rest in a temp matrix, compressing unique values by patients
+NeuroIm1_Fix <- unique(NeuroIm1[,-1*(11:13)])
+#length(unique(NeurIm1_Fix))
+
+# Define Variables/Columns: Patients, type of Measures and ROI [Region of Interest]
+Patients <- NeuroIm1_Fix$Subject_ID
+Measures <- c("SA","SI","CV","FD")
+ROI <- unique(NeuroIm1$ROI)
+# Initialize a new data matrix that has the correct # of columns
+NeuroIm1_NEW = array(0, c(length(Patients), length(ROI)*length(Measures)))
+## We assign names to the columns in the form of Value_Measure_ROI
+```
+
+
+```{r STEP 1 - labels, echo=TRUE, message=FALSE, warning=FALSE}
+names = NULL
+for (j in 1:length(Measures)) {
+  for (i in 1:length(ROI))
+    names = c(names, paste("Value",Measures[j], ROI[i],"END", sep="_"))
+}
+#length(names)
+#dim(NeuroIm1_NEW)
+names(NeuroIm1_NEW) <- names
+
+```
+
+
+```{r STEP 2 - DATA HARMONIZATION and STEP 3 DATA AGGREGATION, echo=TRUE, message=FALSE, warning=FALSE}
+# This loops extract a record from the big dataset, matching patient id, type of measure and ROI.
+# Then It looks at the columns of the expanded matrix (# columns = Measures x ROI), and selects
+# the column that matches the label resulting by combining Measures and ROI values in the record.
+# Then it retries the value in the Value field of the big matrix and place it in the expanded matrix
+# at the selected column
+
+for (i in 1:length(Patients)) {
+  for (j in 1:length(Measures)) {
+    for (s in 1:length(ROI)) {
+      NeuroIm1_temp = NeuroIm1[NeuroIm1$Subject_ID==i & NeuroIm1$Measure==Measures[j] & NeuroIm1$ROI==ROI[s],]
+      a = paste(c("Value_",Measures[j],"_",ROI[s],"_END"),collapse="")
+      b = which(names(NeuroIm1_NEW)==a)
+      NeuroIm1_NEW[i,b] <- NeuroIm1_temp$Value
+    }
+  }
+}
+
+# Appends the matrix that is fixed from the big matrix to the expanded one.
+# The final dimension of this matrix is rows=# patients
+# This is the matrix to use for the analysis with SuperLearner, after few more
+# data cleaning and recasting.
+# List of libraries/packages needed below
+library("colorspace")
+library("grid")
+library("data.table")
+library("VIM")
+library(MASS)
+library(Matrix)
+library(lme4)
+library(arm)
+library(foreach)
+library(glmnet)
+library(class)
+library(nnet)
+
+NeuroIm1_Final <- cbind(NeuroIm1_Fix, NeuroIm1_NEW)
+# Set the names/labes of the columns
+names(NeuroIm1_Final) <- c(names(NeuroIm1_Fix),names)
+
+# Normalization of the aggregated matrix without Group and Sex
+# This step will need to be moved within the SuperLearner loop,
+# at the same time when IMPUTATION is performed on each subset of the 
+# aggregated matrix
+a1 = which(names(NeuroIm1_Final) == "Group")
+a2 = which(names(NeuroIm1_Final) == "Sex")
+
+cont = 1:length(NeuroIm1_Final)
+cont <- cont[-1*c(a1,a2)]
+```
+
+```{r DATA NORMALIZATION, echo=TRUE, message=FALSE, warning=FALSE}
+NeuroIm1_Final[,cont] <- data.frame(apply(NeuroIm1_Final[,cont], 2, function(x)
+{x <- rescale(x, "full")}));
+rm(cont)
+```
+
+```{r DATA relabeling, echo=TRUE, message=FALSE, warning=FALSE}
+# Recast the binary variable Sex
+NeuroIm1_Final$Sex <- ifelse(NeuroIm1_Final$Sex=="F",1,0)
+
+## Generating binary outcome matrices and relabeling categorical variables
+## SINCE WE HAVE 3 GROUPS: AD-aLZHEIMER, MCI=MINOR COGNITIVE IMPAIRMENT, NC=NORMAL
+NeuroIm1_Final_AD = NeuroIm1_Final[NeuroIm1_Final$Group == "AD",]
+NeuroIm1_Final_NC = NeuroIm1_Final[NeuroIm1_Final$Group == "NC",]
+NeuroIm1_Final_MCI = NeuroIm1_Final[NeuroIm1_Final$Group == "MCI",]
+
+# Merge the datasets for training. I am defining 3 datsets here to be used for training
+# since the SUperLearner function only works with binomial outcomes (for now).
+# We will test SL comparing AD vs NC
+NeuroIm1_Final_AD_vs_NC_training = rbind(NeuroIm1_Final_AD,NeuroIm1_Final_NC) # This is our aggregated dataset !!
+NeuroIm1_Final_AD_vs_MCI_training = rbind(NeuroIm1_Final_AD,NeuroIm1_Final_MCI)
+NeuroIm1_Final_NC_vs_MCI_training = rbind(NeuroIm1_Final_NC,NeuroIm1_Final_MCI)
+
+# Labels the columns of the new matrices
+names(NeuroIm1_Final_AD_vs_NC_training) <- c(names(NeuroIm1_Fix),names)
+names(NeuroIm1_Final_AD_vs_MCI_training) <- c(names(NeuroIm1_Fix),names)
+names(NeuroIm1_Final_NC_vs_MCI_training) <- c(names(NeuroIm1_Fix),names)
+
+# Defining and recasting the binary variable Group for each dataset
+NeuroIm1_Final_AD_vs_NC_training$Group <- ifelse(NeuroIm1_Final_AD_vs_NC_training$Group=="AD",1,0)
+NeuroIm1_Final_AD_vs_MCI_training$Group <- ifelse(NeuroIm1_Final_AD_vs_MCI_training$Group=="AD",1,0)
+NeuroIm1_Final_NC_vs_MCI_training$Group <- ifelse(NeuroIm1_Final_NC_vs_MCI_training$Group=="MCI",1,0)
+
+# Define the temporary output [Ytemp] and input [Xtemp] matrices for the SuperLearner call
+Xtemp = NeuroIm1_Final_AD_vs_NC_training; # temporary X-->Xtemp to modify and pass to SuperLearner
+#Xtemp = NeuroIm1_Final_AD_vs_MCI_training; 
+#Xtemp = NeuroIm1_Final_MCI_vs_NC_training; 
+#Xnew = NeuroIm1_Final_AD_vs_NC_test; # temporary X-->Xtemp to modify and pass to SuperLearner
+
+# assign the Group column to the output Y
+Ytemp = NeuroIm1_Final_AD_vs_NC_training$Group; # Output Matrix Y for SuperLearner
+#Y = NeuroIm1_Final_AD_vs_MCI_training$Group; # Output Matrix Y for SuperLearner
+#Y = NeuroIm1_Final_MCI_vs_NC_training$Group; # Output Matrix Y for SuperLearner
+
+# Select the columns Patient ID [1], MMSE [3]  (Mini-Mental State Exam score, a cognitive assessment measure),
+# and CDR [4] (Clinical Dementia Rating scale from the test dataset X)[Group]
+# and eliminate them from the training dataset because almost perfectly correlated to Y
+w = which(names(NeuroIm1_Final_AD_vs_NC_training) == "Subject_ID" | names(NeuroIm1_Final_AD_vs_NC_training) == "Group" |
+            names(NeuroIm1_Final_AD_vs_NC_training) == "MMSE" | names(NeuroIm1_Final_AD_vs_NC_training) == "CDR")
+names(Xtemp)
+Xtemp <- Xtemp[,-1*w] # Eliminate the output column (Group) from the training dataset X 
+names(Xtemp)
+```
+
+
+```{r SAMPLING OF THE PREDICTION DATASET, echo=TRUE, message=FALSE, warning=FALSE}
+## SAMPLE THE PREDICTION DATASET
+# Fraction (SET TO 15% BELOW) of data/patients to use for prediction, IN A BALANCED WAY
+alpha=0.15
+a1=round(length(which(Ytemp==1))*alpha);
+a2=round(length(which(Ytemp==0))*alpha);
+# selects randomly patients for prediction
+q1 = sample(which(Ytemp==1),a1)
+q2 = sample(which(Ytemp==0),a2)
+q <- c(q1 , q2)
+Xnew <- as.data.frame(Xtemp[q,]) # define the patients to predict
+Xtemp <- Xtemp[-1*q,] # eliminate q patients for prediction [not used in the training]
+Ypred <- Ytemp[q] # assign the output for the prediction set [not used in the training]
+Ytemp <- Ytemp[-1*q] # eliminate q patients for prediction [not used in the training]
+
+# SET THE SAME NAMES/LABELS FOR THE NEW MATRIX Xnew
+names(Xnew) <- names(Xtemp)
+```
+
+
+```{r STEPS 5 and 6 ADD LIBRARIES, echo=TRUE, message=FALSE, warning=FALSE}
+## STEP 5 - SUPERLEARNER FUNCTION LOOP (TRAINING/VALIDATION): M,K and N
+## LIBRARIES/PACKAGES NEEDED FOR THE SUPERLEARNER LOOP
+library(nnls)
+library(SuperLearner)
+library(plotrix)
+library(TeachingDemos)
+library(plotmo)
+library(earth)
+library(parallel)
+library(splines)
+library(gam)
+library(foreach)
+```
+
+```{r STEPS 5 and 6 ADD WRAPPERS, echo=TRUE, message=FALSE, warning=FALSE}
+# Specify new SL prediction algorithm wrappers #
+# I CAN EXPLAIN THIS STEP (wrappers) IN MORE DETAIL 
+SL.glmnet.0 <- function(..., alpha = 0){
+  SL.glmnet(..., alpha = alpha)
+} # ridge penalty
+SL.library <- c("SL.glm","SL.gam","SL.glmnet","SL.glmnet.0")
+
+M=100; # This is the number of random subsets of the big dataset [from 1e2 to 1e5] to perform SuperLearner on
+coordSL=dim(Xtemp)
+N=coordSL[1]
+K=coordSL[2]
+
+
+## SUPERLEARNER LOOP
+for(j in seq(1:M)) {
+  Kcol <- round(K*runif(1,0.15,0.3)) # sample a value from a uniform distribution within 0.01 and 0.1 [number of columns/covariates between 10-30% of the big dataset]
+  Nrow <- round(N*runif(1,0.6,0.8)) # sample a value from a uniform distribution within 0.6 and 0.8 [number of rows/subjects between 60-80% of the big dataset]
+  #Nrow <- N # this option will NOT sample subjects/rows, it will include them all
+  k <- sample(1:K,Kcol) # this is where I generate the sample of columns
+  n <- sample(1:N,Nrow) # this is where I generate the sample of columns
+  # Automated labeling of sub-matrices, assigned to X
+  eval(parse(text=paste0("X",j," <- as.data.frame(Xtemp[,k])")))
+  eval(parse(text=paste0("X",j," <- as.data.frame(dplyr::slice(X",j,",n))")))
+  eval(parse(text=paste0("X <- X",j)))
+  eval(parse(text=paste0("Y",j," <- Ytemp[n]")))
+  eval(parse(text=paste0("Y <- Y",j)))
+
+  eval(parse(text=paste0("k",j," <- k")))
+  eval(parse(text=paste0("n",j," <- n")))
+  
+  ## STEP 6 - DATA IMPUTATION AND NORMALIZATION
+  # EMPTY NOW, no missing data, WILL FILL IN WITH A MOCK FUNCTION FOR IMPUTATION
+  # NO NORMALIZATION BECAUSE ALREADY PERFORMED ABOVE ON THE AGGREGATED DATASET
+  # THE SAME CALL ON LINES 83-86 WILL BE USED HERE
+  
+  # SUPERLEARNER-SL FUNCTION CALL that generates SL objects
+  SL <- SuperLearner(Y,X,#Xnew[,1:K],
+                           family=binomial(),
+                           SL.library=SL.library,
+                           method="method.NNLS",
+                           verbose = TRUE,
+                           control = list(saveFitLibrary = TRUE),
+                           cvControl = list(V=10));
+    eval(parse(text=paste0("SL_",j," <- SL")));
+}
+```
+
+```{r STEP 7 - GENERATING PREDICTIONS ON THE PREDICTION DATASET, echo=TRUE, message=FALSE, warning=FALSE}
+    # Generates SL_Pred objects using the predict function on the prediction 
+    # dataset with the SL object as the predictive model.
+    # SL_Pred returns both the SuperLearner predictions ("pred") and 
+    # predictions for each algorithm in the library (SL.library above)
+for(j in seq(1:M)) {
+  eval(parse(text=paste0("SL_Pred_",j," <- predict(SL_",j,", Xnew[,k",j,"])")))
+} 
+
+# Test if all the k are generated throughout the SuperLearner loop
+for (j in seq(1:M)){
+  j
+  eval(parse(text=paste0("k",j)))
+  }
+```
+
+At the end of STEPS 5-6, i.e. the  SuperLearner loop, we have:
+i) Set of M SuperLearner-SL objects labeled as SL_j (j from 1 to M)
+ii) Set of M kj (subset of covariates passed to the SuperLearner function, j from 1 to M)
+iii) Set of M nj (subset of patients/subjects passed to the SuperLearner function, j from 1 to M)
+
+The code below generates Mean Square Error-MSE between the prediction returned on the external dataset Xnew  and the actual testset values. Then it ranks all the MSE. Based on the ranking, the covariates of the top predictions are listed and the common subsets is selected. The common subset of covariates gives an idea of the covariates that are most relevant for the best predictions (i.e., predictions with the lowest MSE).
+A sequence of histograms is generated below by cumulating the prediction rankings.
+NOTE: I need to "normalize" the frequencies in the histograms so the y axis is fixed.
+
+```{r STEPS 7 AND 8, echo=TRUE, message=FALSE, warning=FALSE}
+## STEP 7 - GENERATING MSE
+## MSE obtained by looping through the predictions made on the external dataset of q patients
+## using the SuperLearner prediction algorithm output [SL_Pred_j], with the Xnew 
+## matrix of the appropriate subset of covariates kj
+Ynew = NeuroIm1_Final_AD_vs_NC_training$Group[q];
+sum=0
+for (j in 1:M) {
+  for(i in 1:length(Ynew)) {
+    eval(parse(text=paste0("sum <- sum(Ynew[",i,"] - SL_Pred_",j,"$pred[",i,"])^2")))
+    } 
+  eval(parse(text=paste0("MSE_",j," <- sum/length(Ynew)")))
+  sum = 0;
+}
+## STEP 7 - RANKING MSE
+## MSE obtained by looping through the predictions made on the external dataset of q patients
+## using the SuperLearner prediction algorithm output [SL_Pred_j], with the Xnew 
+## matrix of the appropriate subset of covariates kj
+
+#  GENERATING THE ARRAY OF MSE FOR ALL THE M SL OBJECTS
+MSE=0;
+for (j in 1:M) {
+  eval(parse(text=paste0("MSE[j] <- MSE_",j)))
+}
+```
+
+```{r HISTOGRAMS, echo=TRUE, message=FALSE, warning=FALSE}
+for (s in seq(10,M,10)){
+  MSE_temp <- NULL
+  MSE_sorted_temp <- NULL
+  #MSE_temp <- data.table(mse=MSE[1:s],rank=1:s)
+  MSE_temp <- data.frame(mse=MSE[1:s],rank=1:s)
+  #MSE_sorted_temp <- setorder(MSE_temp, mse,-rank)
+  #MSE_sorted_temp <- sort(MSE_temp, mse,-rank)
+  MSE_sorted_temp <- MSE_temp[order(MSE_temp$mse),]
+  ## DEFINE HERE THE TOP # OF COVARIATES TO LIST in the MODEL MINING STEP
+  top = 10;
+  eval(parse(text=paste0("k_top_",top,"_temp <- NULL")))
+  for (i in 1:top){
+      eval(parse(text=paste0("k_top_",top,"_temp <- c(k_top_",top,"_temp, k",MSE_sorted_temp$rank[i],")")))
+    }
+  ## STEP 8 - MODEL MINING (HISTOGRAMS OF TOP 20 or 50 COVARIATES)
+  # GENERATE HISTOGRAMS OF THE TOP # OF COVARIATES
+  eval(parse(text=paste0("x = k_top_",top,"_temp")))
+  #h = hist(x)
+  eval(parse(text=paste0("h = hist(k_top_",top,"_temp,breaks=seq(min(k_top_",top,"_temp)-0.5,max(k_top_",top,"_temp)+0.5, by=1))")))
+  #eval(parse(text=paste0("hist(k_top_",top,"_temp, breaks=seq(min(k_top_",top,"_temp)-0.5, max(k_top_",top,"_temp)+0.5, by=1))")))
+  h$density = h$counts/sum(h$counts)*100
+  plot(h,freq=FALSE,ylab='Density (%)',xlab='Covariate #')
+  readline("Press <return to continue")
+}
+```
+
+The list of the more frequent covariates is shown below.
+```{r RETRIEVE THE LABEL OF THE MORE FREQUENTLY SELECTED COVARIATES, echo=TRUE, message=FALSE, warning=FALSE}
+# WITHIN THE TOP # OF COVARIATES IN THE PREDICTIONS
+eval(parse(text=paste0("aqw <- data.frame(table(k_top_",top,"_temp))")))
+aqw_ranked <- aqw[order(aqw$Freq),]
+
+t1 = tail(aqw_ranked,10)
+#t1=as.integer(t1[[1]])
+ind_labels <- NULL
+for (i in 1:top){
+  ind_labels = c(ind_labels,as.integer(t1$k_top_10_temp[i]))
+}
+names(Xtemp)[ind_labels]
+
+#save.image("~/Documents/NIH-grant/SOCR/CBDA_v2_temp.RData")
+```
+
+```{r Labeling the top covariates in the histogram}
+#install.packages('calibrate')
+#install.packages('MASS')
+library(calibrate)
+library(MASS)
+eval(parse(text=paste0("h = hist(k_top_",top,"_temp,breaks=seq(min(k_top_",top,"_temp)-0.5,max(k_top_",top,"_temp)+0.5, by=1))")))
+  #eval(parse(text=paste0("hist(k_top_",top,"_temp, breaks=seq(min(k_top_",top,"_temp)-0.5, max(k_top_",top,"_temp)+0.5, by=1))")))
+labels_temp <- NULL
+for (i in 1:length(Xtemp)){
+labels_temp <- c(labels_temp," ")
+}
+#labels_temp[t1$k_top_10_temp] <- names(Xtemp)[t1$k_top_10_temp]
+labels_temp[ind_labels] <- ind_labels
+  h$density = h$counts/sum(h$counts)*100;
+  plot(h,freq=FALSE,ylab='Density (%)',xlab='Covariate #',labels = labels_temp)
+  #textxy(t1, tail(aqw_ranked$N,10), names(Xtemp)[t1])
+#textxy(enrollmentData$YEAR, enrollmentData$UNEM, enrollmentData$ROLL)
+```
+## Generates a list of empty labels first, then populates only the top ten labels at the correspondent positions
+
+load("~/Documents/NIH-grant/SOCR/CBDA_v2_temp.RData")
+
+If we want to see some interesting convergence events, we need to set the parameter M (i.e., number of samples of the big data) very large (~10K). The example I showed above only has M=100 so it can be run it yourself on your machine (by clicking on "knit html") and you will be able to reproduce the same html attached here.
+This is because I want to be sure it produces the same HTML output on your machine (it takes ~15-30 minutes or so to run through 100 loops of SuperLearner).
+Once the test is complete and successful, you can set M=10,000 and run it. That will take several hours to complete.
+Then you will need to change line 305 of the Rmd file into ["for (s in seq(500,M,500))"].
+
+The estimation module will exploit the SuperLearner feature of ranking the best algorithm within each CV fold (10 now) and across the M samples, returning the best or top 2 performing algorithms. once we have these algorithms, we will then run more focused analysis using the specific function calls for these algorithms. The estimation module will aloow us to make inference on the parameter estimatates as well as on the covariance matrices. An important test would be comparing the top covariates emerging from our histogram plots with the parameter estimates returned by the estimation module.
+If there is an overlap or match, we will strengthen our CBDA working hypothesis of a convergence on the most significant covariates.
