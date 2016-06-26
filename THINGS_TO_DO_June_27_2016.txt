@@ -1,0 +1,14 @@
+1) Define te packages for imputation to be used
+  (see this website for reference --> 
+   http://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/)
+
+2) Move the rescaling/normalization step inside the SL LOOP
+
+3) Fix the labeling bug in the histogram plots (now the plots are with densities and not absolute counts)
+
+4) Making the SL objects "lighter", so we don't need to save workspaces of many GBs
+   if M=10K and more than 20-30 algorithm variants are used
+   
+5) Start to generate a list of wrappers to make the SL.library more comprehensive
+
+6) Start to analyze the new dataset Ivo sent (cleaning, harmonization,....)
