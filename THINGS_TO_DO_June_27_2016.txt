@@ -11,4 +11,5 @@
    
 5) Start to generate a list of wrappers to make the SL.library more comprehensive
 
-6) Start to analyze the new dataset Ivo sent (cleaning, harmonization,....)
+6) Start to analyze (cleaning, harmonization,..) the new dataset Ivo sent 
+   (https://umich.instructure.com/courses/38100/files/folder/Case_Studies/15_ALS_CaseStudy)
