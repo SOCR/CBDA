@@ -10,70 +10,15 @@ setwd("/Documents/NIH-grant/SOCR/GITHUB/")
 ## Retrieve the dataset
 #NeuroIm1 = read.table("NeuroIm1.txt", header = TRUE)
 NeuroIm1 = read.table("/home/simeonem/Documents/NIH-grant/SOCR/GITHUB/DATA/NeuroIm1.txt", header = TRUE)
+NeuroIm1 = read.delim("/home/simeonem/Documents/NIH-grant/SOCR/GITHUB/DATA/NeuroIm1.txt", header = TRUE)
 
 # Set the list of packages/libraries to install/include (done through the ipak.R function) 
 packages <- c("ggplot2", "plyr", "colorspace","grid","data.table","VIM","MASS","Matrix",
               "lme4","arm","foreach","glmnet","class","nnet","mice","missForest",
               "calibrate","nnls","SuperLearner","plotrix","TeachingDemos","plotmo",
               "earth","parallel","splines","gam", "Amelia", "Hmisc", "mi")
+source('~/Documents/NIH-grant/SOCR/GITHUB/ipak.R')
 ipak(packages)
-
-#Generate 10% missing values at Random 
-NeuroIm1.mis <- prodNA(NeuroIm1, noNA = 0.1)
-#Check missing values introduced in the data
-summary(NeuroIm1.mis)
-
-# mice_plot <- aggr(NeuroIm1.mis, col=c('navyblue','yellow'),
-#                  numbers=TRUE, sortVars=TRUE,
-#                  labels=names(NeuroIm1.mis), cex.axis=.7,
-#                  gap=3, ylab=c("Missing data","Pattern"))
-
-## IMPUTATION METHODS
-# Hmisc should be the first choice of missing value imputation followed by missForest and MICE.
-# Hmisc automatically recognizes the variables types and uses bootstrap sample and 
-# predictive mean matching to impute missing values. There's np need to separate or 
-# treat categorical variable. However, missForest can outperform Hmisc if the observed 
-# variables supplied contain sufficient information.
-## Hmisc
-# Hmisc is a multiple purpose package useful for data analysis, high – level graphics,
-# imputing missing values, advanced table making, model fitting & diagnostics (linear
-# regression, logistic regression & cox regression) etc. Amidst, the wide range of 
-# functions contained in this package, it offers 2 powerful functions for imputing 
-# missing values. These are impute() and aregImpute(). 
-# impute() function simply imputes missing value using user defined statistical method
-# (mean, max, mean). It’s default is median. On the other hand, aregImpute() allows mean 
-# imputation using additive regression, bootstrapping, and predictive mean matching.
-# In bootstrapping, different bootstrap resamples are used for each of multiple imputations.
-# Then, a flexible additive model (non parametric regression method) is fitted on samples
-# taken with replacements from original data and missing values (acts as dependent variable)
-# are predicted using non-missing values (independent variable).
-# Then, it uses predictive mean matching (default) to impute missing values. 
-# Predictive mean matching works well for continuous and categorical (binary & multi-level)
-# without the need for computing residuals and maximum likelihood fit.
-# Here are some important highlights of this package:
-# 1)   It assumes linearity in the variables being predicted.
-# 2) Fisher’s optimum scoring method is used for predicting categorical variables.
-
-#missForest
-# missForest is an implementation of random forest algorithm.
-# It’s a non parametric imputation method applicable to various variable types. 
-# It yield OOB (out of bag) imputation error estimate.
-# Moreover, it provides high level of control on imputation process.
-# It has options to return OOB separately (for each variable) instead of aggregating over
-# the whole data matrix. This helps to look more closely as to how accurately the model
-# has imputed values for each variable.
-# Since bagging works well on categorical variable too, # we don’t need to remove them here.
-# It very well takes care of missing value pertaining to their variable types:
-
-#impute missing values, using all parameters as default values
-NeuroIm1.imp <- missForest(NeuroIm1.mis)
-
-#check imputed values
-NeuroIm1.imp$ximp
-
-#check imputation error
-NeuroIm1.imp$OOBerror
-
 
 # Delete the last 3 columns from the big matrix NeurIm1 ["ROI","Measure","Value"]
 # and store the rest in a temp matrix, compressing unique values by patients
@@ -155,9 +100,11 @@ cont <- cont[-1*c(a1,a2)]
 
 
 # DATA NORMALIZATION
-NeuroIm1_Final[,cont] <- data.frame(apply(NeuroIm1_Final[,cont], 2, function(x)
-{x <- rescale(x, "full")}));
+NeuroIm1_Final[,cont] <- scale(NeuroIm1_Final[,cont])
 rm(cont)
+#NeuroIm1_Final[,cont] <- data.frame(apply(NeuroIm1_Final[,cont], 2, function(x)
+#{x <- rescale(x, "full")}));
+
 
 # DATA relabeling
 # Recast the binary variable Sex
@@ -248,8 +195,10 @@ for(j in seq(1:M)) {
   k <- sample(1:K,Kcol) # this is where I generate the sample of columns
   n <- sample(1:N,Nrow) # this is where I generate the sample of rows
   # Automated labeling of sub-matrices, assigned to X
-  eval(parse(text=paste0("X",j," <- as.data.frame(Xtemp[,k])")))
-  eval(parse(text=paste0("X",j," <- as.data.frame(dplyr::slice(X",j,",n))")))
+  #eval(parse(text=paste0("X",j," <- as.data.frame(Xtemp[,k])")))
+  #eval(parse(text=paste0("X",j," <- as.data.frame(dplyr::slice(X",j,",n))")))
+  eval(parse(text=paste0("X",j," <- Xtemp[,k]")))
+  eval(parse(text=paste0("X",j," <- dplyr::slice(X",j,",n)")))
   eval(parse(text=paste0("X <- X",j)))
   eval(parse(text=paste0("Y",j," <- Ytemp[n]")))
   eval(parse(text=paste0("Y <- Y",j)))
@@ -262,8 +211,24 @@ for(j in seq(1:M)) {
   # NO NORMALIZATION BECAUSE ALREADY PERFORMED ABOVE ON THE AGGREGATED DATASET
   # THE SAME CALL ON LINES 83-86 WILL BE USED HERE
   
+  # X is the dataset to be imputed each iteration
+  # Here I first replace % (i.e., misValperc) of the data with missing data (i.e., NA)
+  # X -> X.mis
+  misValperc = 0.2;
+  eval(parse(text=paste0("X_mis <- prodNA(X, noNA = " ,misValperc,")")))
+  
+  # Here I impute the missing data in X.mis with the function missForest
+  # X.mis -> X.imp
+  eval(parse(text=paste0("X_imp <- missForest(X_mis, maxiter = 5)")))
+   
+  #check imputed values, imputation error
+  X_imp$ximp
+  X_imp$OOBerror
+  #comparing actual data accuracy
+  X.err <- mixError(X_imp$ximp, X_mis, X)
+  X.err
   # SUPERLEARNER-SL FUNCTION CALL that generates SL objects
-  SL <- SuperLearner(Y,X,#Xnew[,1:K],
+  SL <- SuperLearner(Y,X_imp$ximp,#.imp,#X, if no imputation is performed,
                            family=binomial(),
                            SL.library=SL.library,
                            method="method.NNLS",
