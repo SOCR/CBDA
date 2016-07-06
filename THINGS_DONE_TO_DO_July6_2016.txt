@@ -5,19 +5,22 @@ DONE
 
 3) Added the packages MICE, Amelia, missForest, Hmisc, mi for imputation.For now we are using missForest for testing (likely has the best performance) [see this website for reference   http://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/)
 
+4) Change the rescale function with scale (easier implementation)
+
+5) Moved the imputation inside the SuperLearner loop (normalization is still outside the loop...thoughts?). Imputation performed with missForest.
+
 TO DO
-1) Move the rescaling/normalization/imputation step inside the SL LOOP
 
-2) Allow for multiple options for imputation methods to be used
+1) Allow for multiple options for imputation methods to be used.
 
-3) Fix the labeling bug in the histogram plots (now the plots are with densities and not absolute counts)
+2) Fix the labeling bug in the histogram plots (now the plots are with densities and not absolute counts)
 
-4) Making the SL objects "lighter", so we don't need to save workspaces of many GBs
+3) Making the SL objects "lighter", so we don't need to save workspaces of many GBs
    if M=10K and more than 20-30 algorithm variants are used
    
-5) Start to generate a list of wrappers to make the SL.library more comprehensive, and select one or two classes of prediction algorithms (e.g., glm, glmnet) to be expanded with many options with the wrappers
+4) Start to generate a list of wrappers to make the SL.library more comprehensive, and select one or two classes of prediction algorithms (e.g., glm, glmnet) to be expanded with many options with the wrappers
 
-6) Start to analyze (cleaning, harmonization,..) the new dataset Ivo sent 
+5) Start to analyze (cleaning, harmonization,..) the new dataset Ivo sent 
    (https://umich.instructure.com/courses/38100/files/folder/Case_Studies/15_ALS_CaseStudy)
 
-7) Test the imputation methods by eliminating 20-30% of the observations randomly from the dataset and compare the results vs the whole dataset
+6) Test the imputation methods by eliminating 20-30% of the observations randomly from the dataset and compare the results vs the whole dataset
