@@ -10,7 +10,7 @@ setwd("/Documents/NIH-grant/SOCR/GITHUB/")
 ## Retrieve the dataset
 #NeuroIm1 = read.table("NeuroIm1.txt", header = TRUE)
 NeuroIm1 = read.table("/home/simeonem/Documents/NIH-grant/SOCR/GITHUB/DATA/NeuroIm1.txt", header = TRUE)
-NeuroIm1 = read.delim("/home/simeonem/Documents/NIH-grant/SOCR/GITHUB/DATA/NeuroIm1.txt", header = TRUE)
+#NeuroIm1 = read.delim("/home/simeonem/Documents/NIH-grant/SOCR/GITHUB/DATA/NeuroIm1.txt", header = TRUE)
 
 # Set the list of packages/libraries to install/include (done through the ipak.R function) 
 packages <- c("ggplot2", "plyr", "colorspace","grid","data.table","VIM","MASS","Matrix",
@@ -71,39 +71,9 @@ for (i in 1:length(Patients)) {
 # List of libraries/packages needed below
 
 ## Use ctrl+shift+C to comment/uncomment multiple lines
-# library("colorspace")
-# library("grid")
-# library("data.table")
-# library("VIM")
-# library(MASS)
-# library(Matrix)
-# library(lme4)
-# library(arm)
-# library(foreach)
-# library(glmnet)
-# library(class)
-# library(nnet)
-
 NeuroIm1_Final <- cbind(NeuroIm1_Fix, NeuroIm1_NEW)
 # Set the names/labes of the columns
 names(NeuroIm1_Final) <- c(names(NeuroIm1_Fix),names)
-
-# Normalization of the aggregated matrix without Group and Sex
-# This step will need to be moved within the SuperLearner loop,
-# at the same time when IMPUTATION is performed on each subset of the 
-# aggregated matrix
-a1 = which(names(NeuroIm1_Final) == "Group")
-a2 = which(names(NeuroIm1_Final) == "Sex")
-
-cont = 1:length(NeuroIm1_Final)
-cont <- cont[-1*c(a1,a2)]
-
-
-# DATA NORMALIZATION
-NeuroIm1_Final[,cont] <- scale(NeuroIm1_Final[,cont])
-rm(cont)
-#NeuroIm1_Final[,cont] <- data.frame(apply(NeuroIm1_Final[,cont], 2, function(x)
-#{x <- rescale(x, "full")}));
 
 
 # DATA relabeling
@@ -139,7 +109,7 @@ Xtemp = NeuroIm1_Final_AD_vs_NC_training; # temporary X-->Xtemp to modify and pa
 #Xtemp = NeuroIm1_Final_MCI_vs_NC_training; 
 #Xnew = NeuroIm1_Final_AD_vs_NC_test; # temporary X-->Xtemp to modify and pass to SuperLearner
 
-# assign the Group column to the output Y
+# Assign the Group column to the output Y
 Ytemp = NeuroIm1_Final_AD_vs_NC_training$Group; # Output Matrix Y for SuperLearner
 #Y = NeuroIm1_Final_AD_vs_MCI_training$Group; # Output Matrix Y for SuperLearner
 #Y = NeuroIm1_Final_MCI_vs_NC_training$Group; # Output Matrix Y for SuperLearner
@@ -207,10 +177,6 @@ for(j in seq(1:M)) {
   eval(parse(text=paste0("n",j," <- n")))
   
   ## STEP 6 - DATA IMPUTATION AND NORMALIZATION
-  # EMPTY NOW, no missing data, WILL FILL IN WITH A MOCK FUNCTION FOR IMPUTATION
-  # NO NORMALIZATION BECAUSE ALREADY PERFORMED ABOVE ON THE AGGREGATED DATASET
-  # THE SAME CALL ON LINES 83-86 WILL BE USED HERE
-  
   # X is the dataset to be imputed each iteration
   # Here I first replace % (i.e., misValperc) of the data with missing data (i.e., NA)
   # X -> X.mis
@@ -220,13 +186,27 @@ for(j in seq(1:M)) {
   # Here I impute the missing data in X.mis with the function missForest
   # X.mis -> X.imp
   eval(parse(text=paste0("X_imp <- missForest(X_mis, maxiter = 5)")))
-   
-  #check imputed values, imputation error
-  X_imp$ximp
-  X_imp$OOBerror
-  #comparing actual data accuracy
-  X.err <- mixError(X_imp$ximp, X_mis, X)
-  X.err
+  # #check imputed values, imputation error
+  # X_imp$ximp
+  # X_imp$OOBerror
+  # #comparing actual data accuracy
+  # X.err <- mixError(X_imp$ximp, X_mis, X)
+  # X.err
+  
+  ## MORE OPTIONS FOR IMPUTATION METHODS BELOW [EMPTY NOW]
+  
+  
+  # DATA NORMALIZATION of the sampled matrix without Group and Sex
+  a1 = which(names(X_imp) == "Group")
+  a2 = which(names(X_imp) == "Sex")
+  cont = 1:length(X_imp)
+  cont <- cont[-1*c(a1,a2)]
+  # DATA NORMALIZATION if IMPUTATION IS PERFORMED
+  X_imp[,cont] <- scale(X_imp[,cont])
+  # DATA NORMALIZATION if IMPUTATION IS NOT PERFORMED
+  #X[,cont] <- scale(X[,cont])
+  #rm(cont)
+  
   # SUPERLEARNER-SL FUNCTION CALL that generates SL objects
   SL <- SuperLearner(Y,X_imp$ximp,#.imp,#X, if no imputation is performed,
                            family=binomial(),
