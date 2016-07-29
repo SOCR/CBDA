@@ -1,0 +1,324 @@
+---
+title: "v_1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#SuperLearner Function
+##SL.library
+### Generalized linear model (GLM)
+GLM is fitting generalized linear models, specified by giving a symbolic description of the linear predictor and a description of the error distribution. This algorithm could be used on both categorical or discrete variables and continuous variables. In the meantime, instead of assuming that the response conforms to normally distribution, the response variables could from any exponential families.
+
+####Advantages:
+*	This model could extend the linear model to problems in which the response is categorical or discrete rather than a continuous numeric variable. GLM does not assume a linear relationship between the dependent variable and the independent variables, but it does assume linear relationship between the transformed response in terms of the link function and the explanatory variables.
+* In the Generalized Linear Model (GLM), the response variable may not normally distributed, ε≇N(0,σ^2). For instance, the response variable may be binary (logistic model). GLM addresses these cases – e.g., GLM logit and probit models are GLM special cases appropriate for dichotomous or polytomous variables.
+
+####Assumptions:
+The data Y~1~ ,…,Y~N~ are independently distributed and are assumed to conformed to a distribution from an exponential family.
+
+####Notations:
+*	X: a series of features, which specifies a linear predictor for response.
+*	Y: the response variable.
+*	$β^T=(b_0,b_1 ,…,b_m)$: The parameters of the linear predictor. GLM are typically fit to data by the method of **maximum likelihood**, using **iteratively weighted least squares procedure**. 
+
+####Model components:
+*	A random component  
+  The random component specifies the conditional distribution of the response variable, y, given the predictors, which from an exponential family. 
+*	A linear predictor η=Xβ   
+  $η(x)=β_0+β_1x_1+⋯+β_mx_m$: The value of the linear predictor. $\hat{η}$ (x) represents the estimated value of the linear predictor.
+
+Hence, the models is like $$Y=β_0+β_1x_1+⋯+β_mx_m+  ε,   ε≇N(0,σ^2)$$
+
+*	A link function g[μ(x)]=η(x)  
+The link function enables the connection of the predictor structural component to the response variable, since in some case η(x) may take on any value in (-∞,∞), whereas the mean of a binary random variable must be in the interval (0,1). The link function translates from the scale of the mean response to the scale of the linear predictor.  
+μ(x)  is the mean of a conditional response distribution at a given point in the covariate space and η(x) is the linear predictor.  
+    
+    The link function is important as it specifies the distribution of the response    variable- e.g., “identify link” for normal and non-identity link function for non-normally distributed responses.    
+The choice of the link function is important and should be based on:   
+     1)	Knowledge of the response distribution,   
+     2)	Theoretical process assumptions, and   
+     3)	Empirical fit to the data.     
+  
+    P.S. : In R, the glm function includes a family-generator function, which match link functions to five standard exponential families automatically. Each family has its own canonical link, which is used by default if a link is not given explicitly.  
+    
+    
+| *Family* |	*Default link* |	*Range of y* |	*Var(y│x)* |
+|:--------:|:---------------:|:-------------:|:-----------:|
+|gaussian  |	identity	     |(-∞,+∞)	       |   ϕ         |
+|binomial  |	logit	         |$\frac{(0,1,…,N)}{N}$|$\frac{μ(1-μ)}{N}$ |
+|  poisson |	log	 |0,1,2,…	|μ|
+|Gamma|	Inverse|	(0,+∞)|	$ϕμ^2$|
+|inverse.gaussian|	$\frac{1}{μ^2}$| 	(0,+∞)	|$ϕμ^3$|  
+
+####Statistical Analysis:
+Assume the estimated value of the linear predictor as $η ̂(x)=b_0+b_1 x_1+⋯+b_m x_m$  
+*	The estimated mean of the response is $μ ̂(x)=g^{(-1)} [η ̂(x)]$, because of the link function $g[μ(x)]=η(x)$.  
+*	The variance of distribution is $var(y│x)=ϕ×v[μ(x)]$,   
+ϕ is the positive dispersion parameter related to the variance of the exponential family. For the binomial and poisson distributions, the dispersion parameter equal to 1, for Gaussian data, the parameters could be replaced by $σ^2$.  
+  
+  
+###Generalized additive models (GAM)
+A GAM is a generalized linear model with a linear predictor involving a sum of smooth of functions of covariates. GAM in R uses the backfitting algorithm to combine different smoothing or fitting methods. The Gauss-Seidel methods are used to fit additive models by iteratively smoothing partial residuals. The smoothing or fitting methods currently supported are local regression and smoothing splines.  
+  
+####Advantages:
+The model allows for rather flexible specification of the dependence of the response on the covariates by specifying the model only in terms of ‘smooth functions’, rather than detailed parametric relationships.  
+  
+####Notation:
+*	X: a series of features, which specifies a linear predictor for response.
+*	Y: the response variable.
+*	$f_i (x_i )$: The smooth function.  
+
+
+####GAM in R:
+In general the model has a structure like
+$$g(E(Y))=β_0+f_1 (x_1 )+⋯+f_m (x_m )$$where Y  ~ some exponential family distribution.   
+
+**A Gauss-Seidel method**:fitting additive models by iteratively smoothing partial residuals  
+  
+The pseudo algorithm for this method is shown as follow.    
+    Suppose the function is $y=β_0+f_1 (x_1 )+⋯+f_m (x_m )$  
+    1) Set $\hat{β}_0= E(Y)$  and $\hat{f}_j=0$ for j=1,…,m.  
+    2) Repeat steps 3 to 5 until the estimates, $\hat{f}_j$, stop changing.  
+    3) For j=1,…,m repeat steps 4 and 5.  
+    4) Calculate partial residuals:$e_m^j=y-\hat{β}_0+\sum_{(k≠j)}\hat{f}_j$  
+    5)Set $\hat{f}_j$ equal to the result of smoothing $e_m^j$ with respect to $x_j$.  
+    
+####The smoothing or fitting methods:
+#####local regression: 
+Combine much of the simplicity of linear least squares regression with the flexibility of nonlinear regression. It does this by fitting simple models to localized subsets of the data to build up a function that describes the deterministic part of the variation in the data, point by point.  
+Local regression model could also be known as locally weighted polynomial regression. The polynomial is fitted using weighted least squares, giving more weight to points near the point whose response is being estimated and less weight to points further away.  
+The traditional weight function is the tri-cube weight function
+$$w(x)=(1-|x|^3)^3 I[|x|<1]$$  
+
+#####Smoothing splines:
+The estimators perform a regularized regression over the natural spline basis, placing knots at all points $x_{k1},…,x_{kn}$,k=1,…,m. Smoothing splines also circumvent the problem of knot selection, and simultaneously, they control for over-fitting by shrinking the coefficients of the estimated function.  
+Suppose the function is $y=\sum_{(j=1)}^nβ_j g_j$, where $g_j$ are the truncated power basis functions for natural splines with knots at $x_{k1},…,x_{kn}$.(the natural splines are only defined for odd orders )  
+The coefficients are chosen to minimize
+$$‖y-Gβ‖_2^2+λβ^T Ωβ$$
+where $G∈R^{(n×n)}$  is the basis matrix defined as 
+$$G_{ij}=g_j (x_{ki} )$$i,j=1,…,n,
+and $Ω∈R^{(n×n)}$ is the penalty matrix defined as 
+$$Ω_{ij}=\int {g_i^{''} (t)g_j^{''}(t)}dt, i,j=1,…,n$$
+Given the optimal coefficients $\hat{β}$ minimizing $‖y-Gβ‖_2^2+λβ^T Ωβ$, the smoothing spline estimate at x is defined as 
+$$\hat{r}(x)=\sum_{(j=1)}^n\hat{β}_j g_j (x).$$  
+
+*	The parameter λ≥0 is a tuning parameter, often called the smoothing parameter, and the higher the value of λ, the more shrinkage.  
+*	Similar to least square regression, the $\hat{β}$ is equal to 
+$$\hat{β}=(G^T G+λG)^{-1} G^T y$$
+*	Hence, $$\hat{r} (x)=\sum_{j=1}^n\hat{β}_j g_j (x)=g(x)^T\hat{β} =g(x)^T (G^T G+λG)^{-1} G^T y.$$  
+
+####deg.gam
+In our experiment, we choose different values of deg.gam. This notation represents the maximum degree of the polynomial function that going to be applied during the smoothing splines procedure.  
+The default value of this is 2, but we reset this value equal to 1,2,3,4,5, respectively.  
+
+###A generalized linear model with lasso or elastic net regularization （GLMNET）
+GLMNET is a model, which fit a generalized linear model via penalized maximum likelihood. The regularization path is computed for the lasso or elastic net penalty at a grid of values for the regularization parameter lambda. This model can deal with all shapes of data, including vary large sparse data matrices. Fits linear, logistic and multinomial, poisson, and Cox regression models.  
+
+####Model component:
+**The GLM model**: the GLM functions for different families are different.  
+For “Gaussian” family is
+$$\frac{1}{2}×\frac{1}{(observations)}RSS$$
+For the other models are  
+$$\frac{(-loglik)}{(observations)}$$
+
+**The penalty:**
+$$\frac{(1-α)}{2} ‖β‖_2^2+α‖β‖_1$$
+when α=1,the penalty becomes the lasso penalty,  
+when α=0,the penalty becomes the ridge penalty.  
+
+####Objective functions:  
+For “Gaussian” family is
+$$\frac{1}{2}×\frac{1}{(observations)}RSS++λ×penalty$$
+For the other models are  
+$$\frac{(-loglik)}{(observations)}+λ×penalty$$  
+
+####λ: The shrinkage parameter
+The value of λ has direct relationship with the final result. For instance, in ridge regression, λ controls the size of the coefficients and amount of regularization.  
+If $λ↓0$, we could obtain the least squares solutions.  
+If $λ↑∞$, the estimate parameters we get could tend to 0.  
+In R, the default value of λ is a sequence of number. The # of λ values is 100 and the default number of the smallest value of the λ depends on the sample size relative to the number of the variables. If #observations> #variables, the default is 0.0001, on contrast, the default is 0.01.  
+
+####The penalty:
+#####	LASSO Regularization 
+when α=1,the penalty is the lasso penalty,the objective function is   
+$$β=arg min_β {\sum_{i=1}^n(y_i-β_0-\sum_{j=1}^mx_{ij} β_j )^2+λ\sum_{j=1}^m‖β‖_1}$$
+
+######Advantage:
+Owing to the nature of the $l_1$-penalty, the lasso could both continuous shrinkage and automatic variable selection simultaneously.  
+
+######Limitation:
+*	When the #predictor> #observations, the lasso selects at most n variables before it saturates, because of the convex optimization problem. Moreover, the lasso is not well defines unless the bound on the l_1-norm of the coefficients is smaller than a certain value.
+*	If there is a group of variables among which the pairwise correlations are very high, then the lasso tends to select only one variable form the group and does not care which one is selected.  
+
+#####	Ridge penalty
+When α=0,the penalty is the ridge penalty,the function is 
+$$β=arg min_β {\sum_{i=1}^n(y_i-β_0-\sum_{j=1}^mx_{ij} β_j )^2+\frac{λ}{2}\sum_{j=1}^m‖β‖_2^2 }$$
+
+######Advantage:
+As a continuous shrinkage method, ridge regression achieves its better prediction performance through a bias- variance trade off.  
+
+######Limitation:
+Since it always keeps all the predictors in the model, this regression method could not produce a parsimonious model.  
+
+#####	Elastic net 
+The penalty of elastin net is
+$$\frac {(1-α)}{2} ‖β‖_2^2+α‖β‖_1$$
+which is a convex combination of the lasso and ridge penalty.  
+The elastin net simultaneously does automatic variable selection and continuous shrinkage, and it can select groups of correlated variables.  
+The objective function turns to  
+$$β=arg min_β {\sum_{i=1}^n(y_i-β_0-\sum_{j=1}^mx_{ij} β_j )^2+λ_2 ‖β‖_2^2+λ_1 ‖β‖_1]}$$
+
+**Lemma**: Given data set (y,X) and$(λ_1,λ_2)$, define an artificial data set $(y^*, X^*)$ by
+$$X_{(n+m)×m}^*=(1+λ_2 )^{(-1/2)} \begin{pmatrix}X\\\sqrt{λ_2 } I\\\end{pmatrix},y_{(n+m)}^*=\begin{pmatrix}y\\0\\ \end{pmatrix}.$$
+Let $γ=\frac{(λ_1)}{(\sqrt{1+λ_2})}$  and $β^*=\sqrt{1+λ_2}β$. The elastic net criterion can be written as $$\hat{β}^*=arg min_{β^*} {|y^*-X^*  β^* |^2+γ|β^* |_1}$$
+According to the lemma, this function could be transformed into an equivalent LASSO problem and then be solved.  
+
+####Alpha
+Since the value of alpha has directly relationship with the penalty, we choose different value of alpha to expand this algorithm. The default value of alpha is 1, but we apply 0, 0.25, 0.5, 0.75 and 1 to configure different penalty of this algorithm.  
+
+###Classification and regression with Random Forest (Random Forest) 
+####Procedures of Constructing Random forest 
+A tree is actually a classifier and the purpose of this algorithm is using different sub data set to construct a number of trees and form a forest. After a large number of trees are generated, they vote for the most popular class for an input vector and give prediction.  
+For instance, when generate the $k_{th}$ tree, a random vector $θ_k$ is generated, which is independent of the past random vectors $θ_1,θ_2,…,θ_{(k-1)}$ but with the same distribution. And a tree is grown using the training set and $θ_k$, resulting in a classifier $h(x,θ_k)$, where x is an input vector.  
+
+And then each tree casts a unit vote for the most popular class at input x.  
+  
+  
+####Advantage:
+*	Random forests do not overfit as more trees as added.
+*	Since each tress is constructed independently, random forests have lower correlation between classifiers and high strength.  
+  
+  
+####Some parameters used to expand this algorithm
+**ntree**: the number of trees to grow. This should not be set to too small a number, to ensure that every input row gets predicted at least a few times. And significant improvements in classification accuracy have resulted from growing an ensemble of trees and letting them vote for the most popular class.  
+**mtry**: the number of variables randomly sampled as candidates at each split. The default values are different for classification( $\sqrt{p}$ )and regression($\frac{p}{3}$). P is number of variables in x.  
+**maxnode**: maximum size of terminal nodes. Setting this number larger causes smaller trees to be grown and thus take less time. The default values for classification is 1 and for regression is 5.  
+
+###Support vector machines (SVM)
+Support vector machine is used to train a support vector machine. It can be used to carry out general regression and classification, as well as density- estimation.  
+
+####Description
+####Kernel function    
+    1.	In classification, SVM separate the different classes of data by a hyper-plane
+$$〈Φ(x),w〉+b=0$$   
+Φ is a mapping of the inputting data into a high-dimensional feature space.  
+Hence the decision function $$f(x)=sign〈Φ(x),w〉+b$$  can be used to represent the result of the classification.f(x)=1, when x belong to one class & f(x)=-1, when otherwise)(suppose we have 2 classes).It can be shown that the optimal hyper-plane is the one with the maximal margin of the separation between the two classes.    
+
+    2.**Maximum margin classifier**
+We suppose the hyper-lane could be represents as $〈Φ(x),w〉+b$, hence the distance from a point to this lane is $\frac{f(x)}{‖w‖}$. Hence the geometrical margin could be represent as $γ=y\frac{f(x)}{‖w‖}$   and the objective function becomes to
+$$max  γ=y \frac{f(x)}{‖w‖}$$  
+$$s.t.y_i (w^T Φ(x_i )+b)=y_i f(x_i )≥γ‖w‖  (i=1,2,…,n)$$  
+  
+  
+We could simplify this function to 
+$$max γ=\frac{1}{‖w‖}$$   
+$$s.t.y_i (w^T Φ(x_i )+b)=y_i f(x_i )≥1 (i=1,2,…,n)$$  
+
+since our objective is to find the parameters w and b.
+
+This function could be transferred to convex quadratic programming as followed
+$$min γ=\frac{1}{2}  ‖w‖^2$$
+$$s.t.y_i (w^T Φ(x_i )+b)=y_i f(x_i )≥1 (i=1,2,…,n)$$  
+
+Considering the outliers, we could revise this formula to
+$$min γ=\frac{1}{2}  ‖w‖^2+\frac{C}{n} \sum_{i=1}^nξ_i$$ 
+$$s.t.y_i (w^T Φ(x_i )+b)=y_i f(x_i )≥1-ξ_i  (i=1,2,…,n)$$
+$$ξ_i≥0 (i=1,2,…,n)$$  
+
+Adding Lagrange Duality, 
+$$L(w,b,ξ,α,r)=\frac{1}{2}  ‖w‖^2+\frac{C}{n} \sum_{i=1}^nξ_i -\sum_{i=1}^nα_i (y_i (w^T Φ(x_i )+b)-1+ξ_i)-\sum_{i=1}^nr_i ξ_i $$  
+This problem becomes to $min_{(w,b)} max_{(α_i≥0) }L(w,b,ξ,α,r)$
+The dual form of this formulation is $max_{(α_i≥0)} min_{(w,b)} L(w,b,ξ,α,r)$    
+    3.	Solve dual form of the formulation
+Through derivation and SMO the formulation transfers to   
+
+$$maxa\sum_{i=1}nα_i\frac{-1}{2}\sum_{i,j=1}nα_i α_j y_i y_j Φ(x_i )^T Φ(x_j )  $$
+$$s.t.  0≤α_i≤\frac{C}{n}  (i=1,2,…,n)   $$
+$$\sum_{i=1}^mα_i y_i=0.$$
+
+This is C-SVM.  
+
+####Kernel function 
+A kernel function return the inner product between two points in a suitable feature space, thus defining a notion of similarity, with little computational cost even in very high dimensional spaces.  
+The four kernel functions used in R is shown as followed.  
+
+|*Linear Kernel*|$x'x$|
+|:-----------:|:-----:|
+|*Polynomial Kernel*|$(σx'x+coef0)^deg$|
+|*Radial Basis Kernel*|$exp(-σ|x'x|^2$|
+|*Sigmoid Kernel*|$tanh(σx'x+coef0$)|  
+
+####Advantages:  
+Since the quadratic programming problem and the final decision function depend only on dot products between patterns, with the help of kernel function, the inside dot product can be represented by a kernel function k,
+$$k(x,x' )=〈Φ(x),Φ(x')〉$$
+we could practically work in spaced of any dimension without any significant additional cost, as the “kernel trick”.  
+	In the meantime, with kernel function, SVM could generalize the linear algorithm to the non-linear cases.  
+	When deal with multi-class classification, SVM applies one-against-one method. Although this suggests a higher number of support vector machines to train the overall CPU time used id less compared to the onr-against-all method since the problems are smaller and the SVM optimization problem scales super-linearly.  
+
+####Model component
+The default setting for the SCM is c-classification or eps-regression, depending on whether the response variable is a factor or not. 
+
+####C-classification
+The dual form of the bound constraint C-SVM formulation is:
+$$max W(α)=\sum_{i=1}^nα_i-\frac{1}{2}\sum_{i,j=1}^nα_i α_j (y_i y_j+k(x_i,x_i ))   $$
+$$s.t.0≤α_i≤\frac{C}{n} (i=1,2,…,n)     $$
+$$\sum_{i=1}^nα_i y_i=0.$$  
+
+
+####Some parameters used to expand this algorithm 
+**Type**: svm can be used as a classification machine, as a regression machine, or for novelty detection. Depending of whether y is a factor or not, the default setting for type is C-classification or eps-regression, respectively, but may be overwritten by setting an explicit value.  
+Valid options are:  
+*  C-classification  
+* 	nu-classification  
+*  one-classification (for novelty detection)  
+*	 eps-regression  
+*	 nu-regression    
+
+**Degree**: the parameter needed for kernel of type polynomial. The default value of this is 3.
+
+**Gamma**: the parameter needed for all kernels except linear. The default value of this is $\frac{1}{data}$ dimension.
+
+**Coef0**: parameter needed for kernels of type polynomial and sigmoid. The default value of this is 0.
+
+**Cost**: cost of constraints violation. The default value of this is 1. 
+A high cost value C will force the SVM to create a complex enough prediction function to misclassify as few training points as possible, while a lower cost parameter will lead to simpler prediction function.
+
+**Nu**: since in R, the type could transfer to nu-classification as well, we could change this value.  
+For nu-classification, the dual formulation becomes
+$$maxW(α)=\frac{-1}{2}\sum _{i,j=1}^nα_i α_j y_i y_j k(x_i,x_i )$$
+$$s.t.0≤α_i≤\frac{1}{n} (i=1,2,…,n)     $$
+$$\sum_{i=1}^nα_i y_i=0   $$
+$$\sum_{i=1}^nα_i≥ν$$    
+
+the ν parameter has the interesting property of being an upper bound on the training error and a lower bound on the fraction of support vectors found in the data set, thus controlling the complexity of the classification function build by the SVM.  
+
+
+
+
+
+
+
+
+
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
