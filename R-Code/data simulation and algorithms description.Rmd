@@ -141,128 +141,106 @@ NeuroIm1_Final_AD_vs_NC_training$Group <- ifelse(NeuroIm1_Final_AD_vs_NC_trainin
 NeuroIm1_Final_AD_vs_MCI_training$Group <- ifelse(NeuroIm1_Final_AD_vs_MCI_training$Group=="AD",1,0)
 NeuroIm1_Final_NC_vs_MCI_training$Group <- ifelse(NeuroIm1_Final_NC_vs_MCI_training$Group=="MCI",1,0)
 
-# Define the temporary output [Ytemp] and input [Xtemp] matrices for the SuperLearner call
-Xtemp = NeuroIm1_Final_AD_vs_NC_training; # temporary X-->Xtemp to modify and pass to SuperLearner
-#Xtemp = NeuroIm1_Final_AD_vs_MCI_training; 
-#Xtemp = NeuroIm1_Final_MCI_vs_NC_training; 
-#Xnew = NeuroIm1_Final_AD_vs_NC_test; # temporary X-->Xtemp to modify and pass to SuperLearner
-
-# assign the Group column to the output Y
-Ytemp = NeuroIm1_Final_AD_vs_NC_training$Group; # Output Matrix Y for SuperLearner
-#Y = NeuroIm1_Final_AD_vs_MCI_training$Group; # Output Matrix Y for SuperLearner
-#Y = NeuroIm1_Final_MCI_vs_NC_training$Group; # Output Matrix Y for SuperLearner
-
-# Select the columns Patient ID [1], MMSE [3]  (Mini-Mental State Exam score, a cognitive assessment measure),
-# and CDR [4] (Clinical Dementia Rating scale from the test dataset X)[Group]
-# and eliminate them from the training dataset because almost perfectly correlated to Y
-w = which(names(NeuroIm1_Final_AD_vs_NC_training) == "Subject_ID" | names(NeuroIm1_Final_AD_vs_NC_training) == "Group" |
-            names(NeuroIm1_Final_AD_vs_NC_training) == "MMSE" | names(NeuroIm1_Final_AD_vs_NC_training) == "CDR")
-names(Xtemp)
-Xtemp <- Xtemp[,-1*w] # Eliminate the output column (Group) from the training dataset X 
-names(Xtemp)
-```
-
-
-```{r SAMPLING OF THE PREDICTION DATASET, echo=TRUE, message=FALSE, warning=FALSE}
-## SAMPLE THE PREDICTION DATASET
-# Fraction (SET TO 15% BELOW) of data/patients to use for prediction, IN A BALANCED WAY
-alpha=0.15
-a1=round(length(which(Ytemp==1))*alpha);
-a2=round(length(which(Ytemp==0))*alpha);
-# selects randomly patients for prediction
-q1 = sample(which(Ytemp==1),a1)
-q2 = sample(which(Ytemp==0),a2)
-q <- c(q1 , q2)
-Xnew <- as.data.frame(Xtemp[q,]) # define the patients to predict
-Xtemp <- Xtemp[-1*q,] # eliminate q patients for prediction [not used in the training]
-Ypred <- Ytemp[q] # assign the output for the prediction set [not used in the training]
-Ytemp <- Ytemp[-1*q] # eliminate q patients for prediction [not used in the training]
-
-# SET THE SAME NAMES/LABELS FOR THE NEW MATRIX Xnew
-names(Xnew) <- names(Xtemp)
+# Define the temporary output [rtemp] and input [rtemp] matrices for the SuperLearner call
+rtemp = NeuroIm1_Final_AD_vs_NC_training; # temporary X-->rtemp to modify and pass to SuperLearner
+#rtemp = NeuroIm1_Final_AD_vs_MCI_training; 
+#rtemp = NeuroIm1_Final_MCI_vs_NC_training; 
+#Xnew = NeuroIm1_Final_AD_vs_NC_test; # temporary X-->rtemp to modify and pass to SuperLearner
 
 ```
 
 ##DATA SIMULATION
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-#we could use histogram to preliminary decide the distributions type of 
-# different variables. For instance, In this subdata, only Sex belongs to
-# Categorical distribution, other variables belong to continuous distribution.
-hist(Xtemp$Sex, main="SEX Histogram")
-hist(Xtemp$Age, main="age Histogram")
-hist(Xtemp$TBV, main="TBV Histogram")
-hist(Xtemp$GMV, main="GMV Histogram")
-hist(Xtemp$WMV, main="WMV Histogram")
-hist(Xtemp$CSFV, main="CSFV Histogram")
-hist(Xtemp$Value_SA_10_END, main="Value_SA_10_END Histogram")
-
-
+w=which(names(rtemp)=="Subject_ID")
+rtemp=(rtemp[,-w])
 #set a new matrix for data simulation.
 # a is the number of subjects we are going to generate.
 a<-50
-Xtemp2<-matrix(data=NA,nrow=a,ncol=230)
+rtemp2<-matrix(data=NA,nrow=a,ncol=233)
 # generate Age from binomial distribution.
-Xtemp2[,1] <- c(ifelse(runif(a)<0.5,0,1))
+rtemp2[,1] <- c(ifelse(runif(a)<0.5,0,1))
+rtemp2[,4]<-c(ifelse(runif(a)<0.5,0,1))
 # generate other variables from the normal distribution.
 # the mean of the distribution is equal to the mean of the feature, 
 # and the sd of the distribution is equal to the sd of the features as well.
-for(i in 2:230){
-  Xtemp2[,i]<-rnorm(n=a, mean=mean(Xtemp[,i]), sd=sd(Xtemp[,i]))
+for(i in 2:3){
+  rtemp2[,i]<-rnorm(n=a, mean=mean(rtemp[,i]), sd=sd(rtemp[,i]))
+}
+for(i in 5:233){
+  rtemp2[,i]<-rnorm(n=a, mean=mean(rtemp[,i]), sd=sd(rtemp[,i]))
 }
 # According to the original dataset, AGE,TBV,GMV,WMV,CSFV variables should 
 # be integer
-for(i in 2:6){
-  Xtemp2[,i]<-as.integer(Xtemp2[,i])
+for(i in 2 ){
+  rtemp2[,i]<-as.integer(rtemp2[,i])
+}
+for(i in 5:9 ){
+  rtemp2[,i]<-as.integer(rtemp2[,i])
 }
 # the values variables contain two digits
-for(i in 7:230){
-  Xtemp2[,i]<-round(Xtemp2[,i],digits = 2)
+for(i in 3){
+  rtemp2[,i]<-round(rtemp2[,i],digits = 2)
 }
-nam<-names(Xtemp)
-colnames(Xtemp2)<-c(nam)
+for(i in 10:233){
+  rtemp2[,i]<-round(rtemp2[,i],digits = 2)
+}
+nam<-names(rtemp)
+colnames(rtemp2)<-c(nam)
+write.csv(rtemp2, file="normal distribution")
 
 #try to generate by uniform distribution rather than normal distribution
-Xtemp3<-matrix(data=NA,nrow=a,ncol=230)
+rtemp3<-matrix(data=NA,nrow=a,ncol=233)
 # AGE confroms to binomial distribution as well.
-Xtemp3[,1] <- c(ifelse(runif(a)<0.5,0,1))
+rtemp3[,1] <- c(ifelse(runif(a)<0.5,0,1))
+rtemp3[,4]<-c(ifelse(runif(a)<0.5,0,1))
 # Other variables conform to the normal distribution
-for(i in 2:230){
-  Xtemp3[,i]<-runif(n=a, min=min(Xtemp[,i]), max=max(Xtemp[,i]))
+for(i in 2:3){
+  rtemp3[,i]<-runif(n=a, min=min(rtemp[,i]), max=max(rtemp[,i]))
+}
+for(i in 5:233){
+  rtemp3[,i]<-runif(n=a, min=min(rtemp[,i]), max=max(rtemp[,i]))
 }
 # For AGE,TBV,GMV,WMV,CSFV, the results should be integer
-for(i in 2:6){
-  Xtemp3[,i]<-as.integer(Xtemp3[,i])
+for(i in 2){
+  rtemp3[,i]<-as.integer(rtemp3[,i])
+}
+for(i in 5:9){
+  rtemp3[,i]<-as.integer(rtemp3[,i])
 }
 # For other variables, the results contain two digits
-for(i in 7:230){
-  Xtemp3[,i]<-round(Xtemp3[,i],digits = 2)
+for(i in 3){
+  rtemp3[,i]<-round(rtemp3[,i],digits = 2)
 }
-nam<-names(Xtemp)
-colnames(Xtemp3)<-c(nam)
+for(i in 10:233){
+  rtemp3[,i]<-round(rtemp3[,i],digits = 2)
+}
+nam<-names(rtemp)
+colnames(rtemp3)<-c(nam)
+write.csv(rtemp3, file="uniform distribution")
 ```
 
 ##compare the simulated data and the original data
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 #draw QQ-plot for the top 5 variables, which have highest frequency
-w=min(which(names(Xtemp)=="CSFV"))
-qqplot(Xtemp[,w],Xtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for CSFV ( the normal distribution), frequency=2449")
-qqplot(Xtemp[,w],Xtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for CSFV ( the uniform distribution),frequency=2449")
+w=min(which(names(rtemp)=="CSFV"))
+qqplot(rtemp[,w],rtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for CSFV ( the normal distribution), frequency=2449")
+qqplot(rtemp[,w],rtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for CSFV ( the uniform distribution),frequency=2449")
 
-w=min(which(names(Xtemp)=="Value_FD_53_END"))
-qqplot(Xtemp[,w],Xtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_53_END ( the normal distribution),frequency=2005")
-qqplot(Xtemp[,w],Xtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_53_END ( the uniform distribution),frequency=2005")
+w=min(which(names(rtemp)=="Value_FD_53_END"))
+qqplot(rtemp[,w],rtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_53_END ( the normal distribution),frequency=2005")
+qqplot(rtemp[,w],rtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_53_END ( the uniform distribution),frequency=2005")
 
-w=min(which(names(Xtemp)=="Value_FD_51_END"))
-qqplot(Xtemp[,w],Xtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_51_END ( the normal distribution),frequency=1339")
-qqplot(Xtemp[,w],Xtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_51_END ( the uniform distribution),frequency=1339")
+w=min(which(names(rtemp)=="Value_FD_51_END"))
+qqplot(rtemp[,w],rtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_51_END ( the normal distribution),frequency=1339")
+qqplot(rtemp[,w],rtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_51_END ( the uniform distribution),frequency=1339")
 
-w=min(which(names(Xtemp)=="Value_FD_8_END"))
-qqplot(Xtemp[,w],Xtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_8_END ( the normal distribution),frequency=1312")
-qqplot(Xtemp[,w],Xtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_8_END ( the uniform distribution),frequency=1312")
+w=min(which(names(rtemp)=="Value_FD_8_END"))
+qqplot(rtemp[,w],rtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_8_END ( the normal distribution),frequency=1312")
+qqplot(rtemp[,w],rtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for Value_FD_8_END ( the uniform distribution),frequency=1312")
 
-w=min(which(names(Xtemp)=="WMV"))
-qqplot(Xtemp[,w],Xtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for WMV  ( the normal distribution),frequency=1171")
-qqplot(Xtemp[,w],Xtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for WMV  ( the uniform distribution),frequency=1171")
+w=min(which(names(rtemp)=="WMV"))
+qqplot(rtemp[,w],rtemp2[,w],xlab="original data",ylab="simulated data",main="qq plots for WMV  ( the normal distribution),frequency=1171")
+qqplot(rtemp[,w],rtemp3[,w],xlab="original data",ylab="simulated data",main="qq plots for WMV  ( the uniform distribution),frequency=1171")
 ```
 
 
