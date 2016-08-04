@@ -218,7 +218,8 @@ for(i in 2:6){
 for(i in 7:230){
   Xtemp2[,i]<-round(Xtemp2[,i],digits = 2)
 }
-
+nam<-names(Xtemp)
+colnames(Xtemp2)<-c(nam)
 
 #try to generate by uniform distribution rather than normal distribution
 Xtemp3<-matrix(data=NA,nrow=a,ncol=230)
@@ -236,7 +237,8 @@ for(i in 2:6){
 for(i in 7:230){
   Xtemp3[,i]<-round(Xtemp3[,i],digits = 2)
 }
-
+nam<-names(Xtemp)
+colnames(Xtemp3)<-c(nam)
 ```
 
 ##compare the simulated data and the original data
