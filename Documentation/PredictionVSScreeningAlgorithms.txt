@@ -1,0 +1,10 @@
+Prediction algorithms
+Algorithms that take as input X and
+Y and return a predicted Y value.
+
+Screening algorithms
+Algorithms designed to reduce the
+dimension of X. They take as input X and Y and return a
+logical vector indicating the columns in X passing the
+screening. Screening algorithms can be coupled with
+prediction algorithms to form new prediction algorithms
