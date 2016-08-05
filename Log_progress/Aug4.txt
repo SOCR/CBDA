@@ -1,0 +1,18 @@
+EMAIL UPDATES
+Thank you Jiachen for pushing the latest RMarkdown file for the random set. It is important that we become familiar with github and that we push documentation/code/results so everybody in the team can access them. ;-)
+
+Speaking of github, I just pushed (and keep pushing...) files within a new large folder (PilotTest). The folder has most of the R scripts, log files and RData workspaces generated so far during the pilot test.
+
+There are 15 new experiments running right now on the socr-pipeline where I set the subject/row sample range to 100% (no sampling, all subjects are used). These experiments will possibly confirm my recollection of higher peaks in the feature mining step in the earliest CBDA-SL runs.
+
+I was able to implement a try/catch, so the CBDA-SL experiment will run to completion even if some errors occur during the 10K iterations. I do not expect any issues in the post analysis when dealing with null SL prediction objects.
+
+In the meanwhile, I am testing on my laptop a version of the code that has an expanded SL.library --> more algorithms with more options each (~30-40 different algorithms in the new library....frankly I didn't count them yet....).
+I had some issues to incorporate the latest bartMachine.R script into the SuperLearner function (I think I got it now). No issue for svm and RandoForest.
+
+I am also "tentatively" testing the imputation within the loop as we speak. I am not anticipating to run a full set of experiments with this change, unless it clearly shows to solve the issues with the failed runs. Note: if implemented in the final code, this change will slow down the computation time significantly.
+
+The code has now a system.time function that will tell us how long it took to run a complete CBDA-SL experiment.
+
+I need to launch a set of experiments with the random set that Jiachen has developed....will do it asap.... ;-)
+

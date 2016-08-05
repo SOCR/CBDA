@@ -1,0 +1,33 @@
+-DONE
+1) Created the function 'ipak.R' that groups together all the packages needed, checks if they are installed,
+   installs them if needed and loads them. Made a key change to mirror the correct CRAN site for installation
+   on the socr-pipeline server.
+
+2) Implement a function ('prodNA', part of the missForest package for imputation) that set a % of missing values (i.e., misValperc)
+   in each dataset used by SuperLearner
+
+3) Added the packages MICE, Amelia, missForest, Hmisc, mi for imputation.For now we are using missForest for testing
+   (likely has the best performance) [see this website for reference
+    http://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/)
+
+4) Moved the imputation (performed with missForest now) and normalization (now done with scale instead of rescale, easier implementation)
+    outside the SuperLearner loop (saves a LOT of CPU time).
+
+6) Added the new ALS dataset to the DATA CBDA repository.
+
+7) Running 15 CBDA-SL experiments on socr-pipeline server, combining missing values (misValperc: 0% / 10% / 20% / 30% / 40%)
+   and column subsets (kcol: 5-15% / 15-30% / 30-50%). Each experiment has 10,000 iteration, and runs in batch mode, saving
+   a "light" workspace that we will use in the post analysis to compare the covariate selections under these different conditions.
+
+TO DO
+
+1) Allow for multiple options for imputation methods to be used.
+
+2) Fix the labeling bug in the histogram plots (now the plots are with densities and not absolute counts)
+ 
+3) Start to generate a list of wrappers to make the SL.library more comprehensive,
+   and select one or two classes of prediction algorithms (e.g., glm, glmnet)
+   to be expanded with many options with the wrappers
+
+4) Need to apply CBDA algorithm with SuperLearner the ALS dataset, after cleaning and harmonization is performed.
+
