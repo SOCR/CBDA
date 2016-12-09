@@ -1,5 +1,0 @@
-M	misValperc Kcol_min	Kcol_max	Nrow_min	Nrow_max
-15	0	5	15	60	80
-15	0	15	30	60	80
-15	0	30	50	100	100
-15	0	15	30	100	100
