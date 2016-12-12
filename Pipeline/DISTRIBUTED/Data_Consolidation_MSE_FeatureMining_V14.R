@@ -38,7 +38,6 @@ for (i in i_exp) {
   ## CLEARS THE WORKSPACE FOR FASTER PROCESSING
   rm(list = ls())
   # LOADS THE BASIC INFO TO RUN THE CONSOLIDATION ON THE NEXT EXPERIMENT
-  print(s)
   eval(parse(text=paste0("load(\"~/temp_data_info.RData\")")))
 }
 
