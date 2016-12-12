@@ -263,6 +263,8 @@ eval(parse(text=paste0("SL_",j_global)))
 # predictions for each algorithm in the library (SL.library above)
 eval(parse(text=paste0("try(SL_Pred_",j_global," <- predict(SL_",j_global,", Xpred[,k",j_global,"]))")))
 
+# This checks if the SL_Pred object was successfully generated (i.e., if it exists)
+# If it does not exist, it is set to a double equal to 100
 eval(parse(text=paste0("ifelse(exists(\"SL_Pred_",j_global,"\"),'OK',
                    SL_Pred_",j_global," <- 100)")))
 
