@@ -8,17 +8,16 @@ dataset_file = as.array(args[3])
 workspace_directory=as.array(args[4])
 i_exp=as.numeric(args[5])
 
+# label to append to the RData workspaces as soon as they are created
 label=c("TestDec10")
-# /ifs/loni/ccb/temp/CBDA_SL
-#print(c(j_global,i_exp))
+# /ifshome/pipelnvt/ # home directory as aguest on LONI Pipeline on "Cranium"
 
 #Set the list of packages/libraries to install/include (done through the ipak.R function)
-#library(rJava,lib.loc = "/ifshome/shobel/R-3.3.1/library")
 packages <- c("ggplot2", "plyr", "colorspace","grid","data.table","VIM","MASS","Matrix",
               "lme4","arm","foreach","glmnet","class","nnet","mice","missForest",
               "calibrate","nnls","SuperLearner","plotrix","TeachingDemos","plotmo",
               "earth","parallel","splines","gam","mi",
-              "BayesTree","e1071","randomForest", "Hmisc","dplyr","Amelia","bartMachine","knockoff")#,"rJava")
+              "BayesTree","e1071","randomForest", "Hmisc","dplyr","Amelia","bartMachine","knockoff")
 
 ## ipak function below: install (if missing) and load (if installed) multiple R packages
 ipak <- function(pkg){
@@ -31,35 +30,19 @@ ipak <- function(pkg){
 #install.packages('package_name', dependencies=TRUE, repos='http://cran.rstudio.com/')
 ipak(packages)
 
-#Gaussian_dataset = read.csv("C:/Users/simeonem/Documents/CBDA-SL/Cranium/Gaussian_dataset.txt",header = TRUE)
-# # Simulate some real multivariate data sim_data={y,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10}
-# n <- 1000; u1 <- rbinom(n, 1, .5); v1 <- log(rnorm(n, 5, 1)); x1 <- u1*exp(v1)
-# u2 <- rbinom(n, 10, .5); v2 <- log(rnorm(n, 5, 1)); x2 <- u2*exp(v2)
-# x3 <- rbinom(n, 10, prob=0.45); x4 <- ordered(rep(seq(1, 5),n)[sample(1:n, n)]);
-# x5 <- rep(letters[1:10],n)[sample(1:n, n)]; x6 <- trunc(runif(n, 10, 10));
-# x7 <- rnorm(n); x8 <- factor(rep(seq(1,10),n)[sample(1:n, n)]);
-# x9 <- runif(n, 0.1, .99); x10 <- rpois(n, 4);
-# y <- x1 + x2 + x7 + x9 + rnorm(n)
-# 
-# # package the simulated data as a data frame object
-# sim_data <- cbind.data.frame(y, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10)
-
-
-
-
+# Reads the dataset to be processed as passed from the input argument
 eval(parse(text=paste0("Data = read.csv(dataset_file, header = TRUE)")))
 
+# Sets the complete dataset and the outcome variable
 Ytemp <- Data[,1]
 Xtemp <- Data[,-1]
 
+# SET THE SAME NAMES/LABELS FOR THE X dataset
 names(Xtemp) <- 1:dim(Xtemp)[2]
+
+# Sets the nonzero features [only used for testing]
 p = 100;   # number of variables
 nonzero=c(1,seq(10,p,10)); # variables with nonzero coefficients
-#knockoff.filter(Xtemp,Ytemp)
-
-# The false discovery proportion is
-# fdp <- function(selected) sum(beta[selected] == 0) / max(1, length(selected))
-# fdp(result$selected)
 
 ## IMPUTATION AND NORMALIZATION STEP (OFFLINE ON THE WHOLE DATASET)
 ## DATA IMPUTATION
@@ -68,10 +51,8 @@ nonzero=c(1,seq(10,p,10)); # variables with nonzero coefficients
 eval(parse(text=paste0("arguments = read.table(arg_file, header = TRUE)")))
 misValperc <- arguments[i_exp,2]
 Xtemp_mis <- prodNA(Xtemp, noNA = misValperc/100)
-#eval(parse(text=paste0("Xtemp_mis <- prodNA(Xtemp, noNA = " ,misValperc,")")))
 
 # Here I impute the missing data in Xtemp.mis with the function missForest
-# Xtemp.mis -> Xtemp.imp
 Xtemp_imp <- missForest(Xtemp_mis, maxiter = 5)
 
 ## DATA NORMALIZATION of the sampled matrix without Group and Sex
@@ -95,10 +76,6 @@ Xpred <- Xnorm_ALL[q,]
 Xnorm_sub <- Xnorm_ALL[-1*q,]  # eliminate the q patients from the "training/learning" matrix of features (renamed as Xnorm) [not used in the training]
 Ypred <- Ytemp[q] # define the output for prediction (renamed Ypred) [not used in the training/learning]
 Ytemp_sub <- Ytemp[-1*q] # define the output for learning by eliminating the q subjects that are not used in the training/learning
-
-# SET THE SAME NAMES/LABELS FOR THE NEW MATRIX Xnew
-# names(Xnew) <- names(Xtemp_imp$ximp)
-# names(Xnorm) <- names(Xtemp_imp$ximp)
 
 # STEPS 5 and 6 ADD LIBRARIES
 # Specify new SL prediction algorithm wrappers 
@@ -131,11 +108,13 @@ SL.gam.5<-function(...,control=gam.control(deg.gam=5)){
   SL.gam(...,control=control)
 }
 
-
 create.SL.glmnet.alpha<-function(...,alpha=c(0.25,0.5,0.75))
 {
   SL.glmnet(..., alpha=alpha)
 }
+
+## The bartMachine wrapper won't be necessary with the latest release of the SL.bartMachine.
+## It's not properly installed yet.
 
 #' Wrapper for bartMachine learner
 #'
@@ -209,7 +188,6 @@ predict.SL.bartMachine <- function(object, newdata, family, X = NULL, Y = NULL,.
   pred <- predict(object$object, newdata)
   return(pred)
 }
-#source("SL.bartMachine")
 # SL.library <- c("SL.glm","SL.gam","SL.gam.1","SL.gam.3","SL.gam.4","SL.gam.5",
 #                 "SL.glmnet","SL.glmnet.0","SL.glmnet.0.25","SL.glmnet.0.50","SL.glmnet.0.75",
 #                 "SL.svm",
@@ -224,8 +202,7 @@ N=coordSL[1]
 K=coordSL[2]
 
 
-## SUPERLEARNER LOOP
-
+## INITIALIZATION BEFORE THE SUPERLEARNER LOOP
 M <-arguments[i_exp,1]
 print(misValperc)
 Kcol_min <- arguments[i_exp,3]
@@ -234,8 +211,6 @@ Nrow_min <- arguments[i_exp,5]
 Nrow_max <- arguments[i_exp,6]
 range_n <- eval(parse(text=paste0("c(\"",Nrow_min,"_",Nrow_max,"\")")))
 range_k <- eval(parse(text=paste0("c(\"",Kcol_min,"_",Kcol_max,"\")")))
-# Kcol <- round(K*(runif(1,Kcol_min/100,Kcol_max/100))) # sample a value from a uniform distribution within 0.15 and 0.3 [number of columns/covariates between 15-30% of the big dataset]
-# Nrow <- round(N*(runif(1,Nrow_min/100,Nrow_max/100))) # sample a value from a uniform distribution within 0.6 and 0.8 [number of rows/subjects between 60-80% of the big dataset]
 
 Kcol <- round(dim(Xnorm_sub)[2]*(runif(1,Kcol_min/100,Kcol_max/100))) # sample a value from a uniform distribution within 0.6 and 0.8 [number of rows/subjects between 60-80% of the big dataset]
 eval(parse(text=paste0("k <- sample(1:length(Xnorm_sub),Kcol)")))
@@ -245,109 +220,63 @@ eval(parse(text=paste0("n <- sample(1:length(Ytemp_sub),Nrow)")))
 
 
 print(c(j_global,i_exp))
-      k <- sample(1:K,Kcol) # this is where I generate the sample of columns
-      n <- sample(1:N,Nrow) # this is where I generate the sample of rows
-      #n <- 1:N # this is where I generate the sample of rows
-      # Automated labeling of sub-matrices, assigned to X
-      eval(parse(text=paste0("X",j_global," <- Xnorm_sub[n,k]")))
-      eval(parse(text=paste0("X <- as.data.frame(X",j_global,")")))
-      eval(parse(text=paste0("Y",j_global," <- Ytemp_sub[n]")))
-      eval(parse(text=paste0("Y <- Y",j_global)))
-      eval(parse(text=paste0("k",j_global," <- k")))
-      eval(parse(text=paste0("n",j_global," <- n")))
-      # SUPERLEARNER-SL FUNCTION CALL that generates SL objects
+k <- sample(1:K,Kcol) # this is where I generate the sample of columns
+n <- sample(1:N,Nrow) # this is where I generate the sample of rows
+#n <- 1:N # this is where I generate the sample of rows
+# Automated labeling of sub-matrices, assigned to X
+eval(parse(text=paste0("X",j_global," <- Xnorm_sub[n,k]")))
+eval(parse(text=paste0("X <- as.data.frame(X",j_global,")")))
+eval(parse(text=paste0("Y",j_global," <- Ytemp_sub[n]")))
+eval(parse(text=paste0("Y <- Y",j_global)))
+eval(parse(text=paste0("k",j_global," <- k")))
+eval(parse(text=paste0("n",j_global," <- n")))
 
-      ## KNOCKOFF FILTER IMPLEMENTATION  
-      ## IMPORTANT  --> subjects # >> features # !!!
-      ## It creates KO_result_j objects with all the stats, results, FDR proportion,...
-      # knockoff.filter(X, Y, fdr = 0.2, statistic = NULL,
-      # threshold = c("knockoff", "knockoff+"), knockoffs = c("equicorrelated","sdp"),
-      #               normalize = TRUE, randomize = FALSE)
-      
-      # eval(parse(text=paste0("KO_result_",j_global," = knockoff.filter(X, Y, normalize = FALSE)")))
-      # eval(parse(text=paste0("print(KO_result_",j_global,")")))
-      
-      eval(parse(text=paste0("KO_result_",j_global," = knockoff.filter(Xnorm_sub[n",j_global,",k",j_global,"], Ytemp_sub[n",j_global,"],fdr = 0.05)")))
 
-      eval(parse(text=paste0("KO_selected_",j_global," <- as.numeric(sub(\"V\",\"\",names(KO_result_",j_global,"$selected)))")))
-      #eval(parse(text=paste0("KO_sub <- c(KO_sub,KO_selected_sub_",j_global,")")))
-      
-      
-    ## Superlearner Function ##
-    SL <- try(SuperLearner(Y,X,
-                           family=gaussian(),
-                           SL.library=SL.library,
-                           method="method.NNLS",
-                           verbose = FALSE,
-                           control = list(saveFitLibrary = TRUE),
-                           cvControl = list(V=10)));
-    eval(parse(text=paste0("SL_",j_global," <- SL")));
-    eval(parse(text=paste0("SL_",j_global)))
-    #eval(parse(text=paste0("typeof(SL_",j_global,")")));
-    # Generate the prediction object from the SL object
-    # STEP 7 - GENERATING PREDICTIONS ON THE PREDICTION DATASET
-    # Generates SL_Pred objects using the predict function on the prediction 
-    # dataset with the SL object as the predictive model.
-    # SL_Pred returns both the SuperLearner predictions ("pred") and 
-    # predictions for each algorithm in the library (SL.library above)
-    eval(parse(text=paste0("try(SL_Pred_",j_global," <- predict(SL_",j_global,", Xpred[,k",j_global,"]))")))
+## KNOCKOFF FILTER IMPLEMENTATION  
+## IMPORTANT  --> subjects # >> features # !!!
+## It creates KO_result_j objects with all the stats, results, FDR proportion,...
+# knockoff.filter(X, Y, fdr = 0.2, statistic = NULL,
+# threshold = c("knockoff", "knockoff+"), knockoffs = c("equicorrelated","sdp"),
+#               normalize = TRUE, randomize = FALSE)
 
-    #eval(parse(text=paste0("ifelse(exists(\"SL_Pred_",j_global,"\"),'OK',
-    #                         ifelse(!exists(\"SL_Pred_",j_global,"\"),SL_Pred_",j_global," <- NULL))")))
-    eval(parse(text=paste0("ifelse(exists(\"SL_Pred_",j_global,"\"),'OK',
-                       SL_Pred_",j_global," <- 100)")))
-    #eval(parse(text=paste0("typeof(SL_Pred_",j_global,")")));
-    # remove the large SL object
-    #print(SL_Pred_1)
-    #eval(parse(text=paste0("rm(SL_",j_global,")")))
-    # print("ITERATION")
-    # print(j_global)
-    # print("% completed jobs")
-    # print(100*j_global/M)
-#  }
-#})[[3]]
+eval(parse(text=paste0("KO_result_",j_global," = knockoff.filter(Xnorm_sub[n",j_global,",k",j_global,"], Ytemp_sub[n",j_global,"],fdr = 0.05)")))
 
-#Ynew = NeuroIm1_Final_AD_vs_NC_training$Group[q];
-#Complete = "Complete"
-#Light = "Light"
-# SAVE THE COMPLETE DATASET WITH ALL THE SL OBJECTS
-# eval(parse(text=paste0("con_Complete <- '~/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Complete.RData'")))
-# save.image(file=con_Complete) 
-# close(con_Complete)
+eval(parse(text=paste0("KO_selected_",j_global," <- as.numeric(sub(\"V\",\"\",names(KO_result_",j_global,"$selected)))")))
 
-## Save the complete workspaces with SL objects
-#eval(parse(text=paste0("save.image(\"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Complete.RData\")")))
+## SUPERLEARNER LOOP
+# SUPERLEARNER-SL FUNCTION CALL that generates SL objects
+## Superlearner Function ##
+SL <- try(SuperLearner(Y,X,
+                       family=binomial(),
+                       SL.library=SL.library,
+                       method="method.NNLS",
+                       verbose = FALSE,
+                       control = list(saveFitLibrary = TRUE),
+                       cvControl = list(V=10)));
+eval(parse(text=paste0("SL_",j_global," <- SL")));
+eval(parse(text=paste0("SL_",j_global)))
 
-#eval(parse(text=paste0("save.image(\"CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,".RData\")")))
-#eval(parse(text=paste0("save.image(\"~/CBDA-SL/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Complete.RData\")")))
-#eval(parse(text=paste0("save.image(\"Desktop/R/CBDA_SL_M",M,"_miss",misValperc*100,"_n",range_n,"_k",range_k,".RData\")")))
+# STEP 7 - GENERATING PREDICTIONS ON THE PREDICTION DATASET
+# Generates SL_Pred object using the predict function on the prediction 
+# dataset with the SL object as the predictive model.
+# SL_Pred returns both the SuperLearner predictions ("pred") and 
+# predictions for each algorithm in the library (SL.library above)
+eval(parse(text=paste0("try(SL_Pred_",j_global," <- predict(SL_",j_global,", Xpred[,k",j_global,"]))")))
 
-# GENERATE THE LIGHT DATASET BY DELETING THE SL OBJECTS
-#for (j in 1:M){
-  eval(parse(text=paste0("rm(SL_",j_global,")")))
-#}
-## Save the complete workspaces without the SL objects
-#w1<-Sys.Date()
-## Unix set of commands for creating a directory and moving a subset of files into it
-#eval(parse(text=paste0("dir.create(\"",workspace_directory,"\\",w1,"\")"))) # Unix
-#eval(parse(text=paste0("save.image(\"~/CBDA-SL/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Light.RData\")")))
-#eval(parse(text=paste0("save.image(\"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Light.RData\")")))
-#eval(parse(text=paste0("save(Ynew,SL_Pred_",j_global,",k",j_global,",file= ",workspace_directory,"CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Light.RData\")")))
+eval(parse(text=paste0("ifelse(exists(\"SL_Pred_",j_global,"\"),'OK',
+                   SL_Pred_",j_global," <- 100)")))
 
+# GENERATE THE LIGHT DATASET BY DELETING THE SL OBJECT
+eval(parse(text=paste0("rm(SL_",j_global,")")))
+
+# SAVE THE RDATA WORKSPACE WITH THE ALL DATA
 eval(parse(text=paste0("save(Xpred,label, Xnorm_ALL, Xnorm_sub, q, Ypred, M, Ytemp, Ytemp_sub, SL_Pred_",j_global,
                        ",nonzero,n",j_global,",k",j_global,",KO_selected_",j_global,",
                        file= \"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k"
                        ,range_k,"_Light_",j_global,"_",label,".RData\")")))
 eval(parse(text=paste0("save(arguments,label,workspace_directory,i_exp,file= \"~/temp_data_info.RData\")")))
 
-#eval(parse(text=paste0("KO_result_",j_global," = knockoff.filter(X, Y, normalize = FALSE)")))
-
-#eval(parse(text=paste0("save(arguments,workspace_directory,file= \"~/MSE_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Light_",j_global,"_KO.RData\")")))
-# eval(parse(text=paste0("save(arguments,label,workspace_directory,file= \"",workspace_directory,"/MSE_temp_",label,"_Dec5.RData\")")))
-# eval(parse(text=paste0("save(arguments,label,workspace_directory,file= \"",workspace_directory,"/MSE_temp_",label,"_Dec5.RData\")")))
-
-
-# #CV Superlearner function application
+#CV Superlearner function application [NOT TESTED YET]
 # CV_SL <- try(CV.SuperLearner(Y,
 #                              X,
 #                              V=10, family=gaussian(),
