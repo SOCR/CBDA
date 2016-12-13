@@ -274,7 +274,7 @@ eval(parse(text=paste0("rm(SL_",j_global,")")))
 # SAVE THE RDATA WORKSPACE WITH THE ALL DATA
 eval(parse(text=paste0("save(Xpred,label, Xnorm_ALL, Xnorm_sub, q, Ypred, M, Ytemp, Ytemp_sub, SL_Pred_",j_global,
                        ",nonzero,n",j_global,",k",j_global,",KO_selected_",j_global,",
-                       file= \"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k"
+                       file= \"",workspace_directory,"CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k"
                        ,range_k,"_Light_",j_global,"_",label,".RData\")")))
 eval(parse(text=paste0("save(arguments,label,workspace_directory,i_exp,file= \"~/temp_data_info.RData\")")))
 
