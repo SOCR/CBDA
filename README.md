@@ -23,6 +23,6 @@ interactive services for data interrogation, including high-dimensional data vis
 and education. Specific applications include neuroimaging-genetics studies of Alzheimer’s disease, predictive modeling of 
 cancer treatment outcomes, and high-throughput data analytics using graphical pipeline workflows.
 
-References
-PMID:26998309 [https://www.ncbi.nlm.nih.gov/pubmed/26998309]
-PMID:26918190 [https://www.ncbi.nlm.nih.gov/pubmed/26918190]
+## References
+* [PMID:26998309](https://www.ncbi.nlm.nih.gov/pubmed/26998309)
+* [PMID:26918190](https://www.ncbi.nlm.nih.gov/pubmed/26918190)
