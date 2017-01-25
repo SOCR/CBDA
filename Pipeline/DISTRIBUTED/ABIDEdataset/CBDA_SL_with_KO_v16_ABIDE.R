@@ -265,12 +265,12 @@ eval(parse(text=paste0("save(arguments,label,workspace_directory,i_exp,Xpred,Ypr
                        Xtemp,Ytemp,cols_to_eliminate,original_names_Data,original_names_Xtemp,
                        file= \"~/ABIDE_ValidationSets_Specs.RData\")")))
 
-eval(parse(text=paste0("save(Xpred,label, q, Ypred, M, Ytemp, SL_Pred_",j_global,
+eval(parse(text=paste0("save(Xpred,label, q, Ypred, M, i_exp, Ytemp, SL_Pred_",j_global,
                        ",nonzero,n",j_global,",k",j_global,",KO_selected_",j_global,",
                        file= \"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k"
                        ,range_k,"_Light_",j_global,"_",label,".RData\")")))
 #eval(parse(text=paste0("save(arguments,label,workspace_directory,i_exp,file= \"~/temp_data_info_",label,".RData\")")))
-eval(parse(text=paste0("save(arguments,label,workspace_directory,i_exp,file= \"~/temp_data_info.RData\")")))
+eval(parse(text=paste0("save(arguments,label,workspace_directory,i_exp,file= \"~/temp_data_info_ABIDE.RData\")")))
 
 #CV Superlearner function application [NOT TESTED YET]
 # CV_SL <- try(CV.SuperLearner(Y,
