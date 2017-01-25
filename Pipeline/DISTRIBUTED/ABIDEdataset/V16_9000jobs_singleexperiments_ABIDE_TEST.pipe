@@ -19,9 +19,9 @@
                 <connection source="Inputj-CBDA-SLiterations1-3000_1.Output" sink="NewModuleGroup_1.j_global-SLiterations" />
                 <connection source="Inputj-CBDA-SLiterations3001-6000_1.Output" sink="NewModuleGroup_1.j_global-SLiterations_2" />
                 <connection source="Inputj-CBDA-SLiterations6001-9000_1.Output" sink="NewModuleGroup_1.j_global-SLiterations_3" />
-                <connection source="Inputi-experiments_1.Output" sink="NewModuleGroup_1.i-experimentnumber" />
-                <connection source="Inputi-experiments_1.Output" sink="NewModuleGroup_1.i-experimentnumber_2" />
-                <connection source="Inputi-experiments_1.Output" sink="NewModuleGroup_1.i-experimentnumber_3" />
+                <connection source="Inputi-Experiment_1.Output" sink="NewModuleGroup_1.i-experimentnumber" />
+                <connection source="Inputi-Experiment_1.Output" sink="NewModuleGroup_1.i-experimentnumber_2" />
+                <connection source="Inputi-Experiment_1.Output" sink="NewModuleGroup_1.i-experimentnumber_3" />
                 <connection source="SuperLearnerLoop_2.flowcontrol" sink="SuperLearnerLoop_1.flowcontrolLOOP" />
                 <connection source="SuperLearnerLoop_1.flowcontrol" sink="SuperLearnerLoop_3.flowcontrolLOOP" />
                 <connection source="InputFlags_2.Output" sink="RankingMSEandDrawinghistograms_1.Flags" />
@@ -40,7 +40,7 @@
                 <output description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" link="Inputj-CBDA-SLiterations1-3000_1.Output" id="V16_9000jobs_singleexperiments_ABIDE_TEST_1.Output_2" name="Output" order="0" />
                 <output description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" link="Inputj-CBDA-SLiterations3001-6000_1.Output" id="V16_9000jobs_singleexperiments_ABIDE_TEST_1.Output_3" name="Output" order="0" />
                 <output description="This data source contains just the R batch-mode execution flags:&#xA;&#xA;Example:&#xA;&#xA;&#xA;See: /ifs/ccb/data/ADNI_Data_2010/R_Pipeline_Example&#xA;" link="InputFlags_2.Output" id="V16_9000jobs_singleexperiments_ABIDE_TEST_1.Output_4" name="Output" order="0" />
-                <moduleGroup id="NewModuleGroup_1" name="New Module Group" posX="1425" posY="0" rotation="1" sourceCode="">
+                <moduleGroup id="NewModuleGroup_1" name="New Module Group" posX="1179" posY="168" rotation="1" sourceCode="">
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Dec 11 09:12:07 EST 2016" />
                         </metadata>
@@ -244,7 +244,7 @@
                                 </input>
                         </module>
                 </moduleGroup>
-                <moduleGroup id="INITIALIZATION-SCRIPTSDATASETSPECS_1" name="INITIALIZATION - SCRIPTS, DATASET &amp; SPECS" posX="0" posY="112" rotation="1" sourceCode="">
+                <moduleGroup id="INITIALIZATION-SCRIPTSDATASETSPECS_1" name="INITIALIZATION - SCRIPTS, DATASET &amp; SPECS" posX="769" posY="49" sourceCode="">
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Dec 11 09:15:04 EST 2016" />
                         </metadata>
@@ -257,6 +257,7 @@
                                 <authors>
                                         <author fullName="Ivo Dinov" email="" website="" />
                                 </authors>
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Aug 11 21:23:40 PDT 2010" />
                                 </metadata>
@@ -271,6 +272,7 @@
                                 <authors>
                                         <author fullName="Ivo Dinov" email="" website="" />
                                 </authors>
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Aug 11 21:23:40 PDT 2010" />
                                 </metadata>
@@ -289,6 +291,7 @@
                                 </values>
                         </dataModule>
                         <dataModule id="InputDirectoryTXT_1" name="Input Directory(TXT)" description="CBDA-SL algorithm with the following specs:&#xA;argument[1]: M = 10&#xA;argument[2]: MISSING VALUE % = 20&#xA;argument[3]: FSR (LOWER RANGE LIMIT) = 30 &#xA;argument[4]: FSR (UPPER RANGE LIMIT) = 40 &#xA;argument[5]: SSR (LOWER RANGE LIMIT) = 60 &#xA;argument[6]: SSR (UPPER RANGE LIMIT) = 80&#xA;argument[7]: dataset filename&#xA;&#xA;Rscript ./CBDA_SL_master_v1.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;Line 31 in the R script reads the dataset in a specific location on my machine. It needs to be change to the current directory the file is saved.&#xA;&#xA;Line 294 (and 380) saves the workspace, again in a specified directory on my machine. It needs to be changed. " posX="412" posY="112" sourceCode="" type="String" source="true" loopIndex="false" serverAddress="socr-pipeline.nursing.umich.edu">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Aug 11 19:29:46 EDT 2016" />
                                 </metadata>
@@ -300,6 +303,7 @@
                                 </values>
                         </dataModule>
                         <dataModule id="InputDataSetTXT_1" name="Input Data Set (TXT)" description="CBDA-SL algorithm with the following specs:&#xA;argument[1]: M = 10&#xA;argument[2]: MISSING VALUE % = 20&#xA;argument[3]: FSR (LOWER RANGE LIMIT) = 30 &#xA;argument[4]: FSR (UPPER RANGE LIMIT) = 40 &#xA;argument[5]: SSR (LOWER RANGE LIMIT) = 60 &#xA;argument[6]: SSR (UPPER RANGE LIMIT) = 80&#xA;argument[7]: dataset filename&#xA;&#xA;Rscript ./CBDA_SL_master_v1.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;Line 31 in the R script reads the dataset in a specific location on my machine. It needs to be change to the current directory the file is saved.&#xA;&#xA;Line 294 (and 380) saves the workspace, again in a specified directory on my machine. It needs to be changed. " posX="286" posY="218" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Aug 11 19:29:46 EDT 2016" />
                                 </metadata>
@@ -321,6 +325,7 @@
                                 <authors>
                                         <author fullName="Ivo Dinov" email="" website="" />
                                 </authors>
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Aug 11 21:23:40 PDT 2010" />
                                 </metadata>
@@ -339,10 +344,11 @@
                                 </values>
                         </dataModule>
                 </moduleGroup>
-                <dataModule id="Inputj-CBDA-SLiterations6001-9000_1" name="Input j - CBDA-SL iterations [6001-9000]" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" posX="1232" posY="763" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="Inputj-CBDA-SLiterations6001-9000_1" name="Input j - CBDA-SL iterations [6001-9000]" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" posX="378" posY="306" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
                         <authors>
                                 <author fullName="Simeone Marino" email="" website="" />
                         </authors>
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Wed Aug 11 21:23:40 PDT 2010" />
                         </metadata>
@@ -3352,7 +3358,7 @@
                                 <value>9000</value>
                         </values>
                 </dataModule>
-                <dataModule id="Inputj-CBDA-SLiterations1-3000_1" name="Input j - CBDA-SL iterations [1-3000]" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" posX="860" posY="352" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="Inputj-CBDA-SLiterations1-3000_1" name="Input j - CBDA-SL iterations [1-3000]" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" posX="489" posY="390" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
                         <authors>
                                 <author fullName="Simeone Marino" email="" website="" />
                         </authors>
@@ -6365,7 +6371,7 @@
                                 <value>3000</value>
                         </values>
                 </dataModule>
-                <dataModule id="Inputj-CBDA-SLiterations3001-6000_1" name="Input j - CBDA-SL iterations [3001-6000]" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" posX="874" posY="417" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="Inputj-CBDA-SLiterations3001-6000_1" name="Input j - CBDA-SL iterations [3001-6000]" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;Rscript ./CBDA_SL_master_V5_parallelized_Cranium.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;The Input j is passed as a master index for the SuperLearner function. j has a cardinality of 5K-50K. Each j can be run independently on a single core.&#xA;&#xA;&#xA;" posX="435" posY="346" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
                         <authors>
                                 <author fullName="Simeone Marino" email="" website="" />
                         </authors>
@@ -9378,21 +9384,22 @@
                                 <value>6000</value>
                         </values>
                 </dataModule>
-                <dataModule id="Inputi-experiments_1" name="Input i - experiments" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;&#xA;Rscript ./CBDA_SL_master_v1.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;Line 31 in the R script reads the dataset in a specific location on my machine. It needs to be changed to the current directory the file is saved.&#xA;&#xA;Line 294 (and 380) saves the workspace, again in a specified directory on my machine. It needs to be changed. " posX="1136" posY="640" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="Inputi-Experiment_1" name="Input i - Experiment" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;&#xA;Rscript ./CBDA_SL_master_v1.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;Line 31 in the R script reads the dataset in a specific location on my machine. It needs to be changed to the current directory the file is saved.&#xA;&#xA;Line 294 (and 380) saves the workspace, again in a specified directory on my machine. It needs to be changed. " posX="562" posY="437" sourceCode="" type="Number" source="true" loopIndex="false" serverAddress="localhost">
                         <authors>
                                 <author fullName="Ivo Dinov" email="" website="" />
                         </authors>
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Wed Aug 11 21:23:40 PDT 2010" />
                         </metadata>
-                        <output id="Inputi-experiments_1.Output" name="Output" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;&#xA;Rscript ./CBDA_SL_master_v1.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;Line 31 in the R script reads the dataset in a specific location on my machine. It needs to be changed to the current directory the file is saved.&#xA;&#xA;Line 294 (and 380) saves the workspace, again in a specified directory on my machine. It needs to be changed. " required="true" enabled="true" order="-1">
+                        <output id="Inputi-Experiment_1.Output" name="Output" description="CBDA-SL algorithm with the following specs:&#xA;&#xA;&#xA;Rscript ./CBDA_SL_master_v1.R  10 20 30 50 60 80  NeuroIm1.txt&#xA;&#xA;Line 31 in the R script reads the dataset in a specific location on my machine. It needs to be changed to the current directory the file is saved.&#xA;&#xA;Line 294 (and 380) saves the workspace, again in a specified directory on my machine. It needs to be changed. " required="true" enabled="true" order="-1">
                                 <format type="Number" cardinality="1" />
                         </output>
                         <values>
                                 <value>1</value>
                         </values>
                 </dataModule>
-                <dataModule id="InputFlags_2" name="Input Flags" description="This data source contains just the R batch-mode execution flags:&#xA;&#xA;Example:&#xA;&#xA;&#xA;See: /ifs/ccb/data/ADNI_Data_2010/R_Pipeline_Example&#xA;" posX="1862" posY="110" sourceCode="" type="String" source="true" loopIndex="false">
+                <dataModule id="InputFlags_2" name="Input Flags" description="This data source contains just the R batch-mode execution flags:&#xA;&#xA;Example:&#xA;&#xA;&#xA;See: /ifs/ccb/data/ADNI_Data_2010/R_Pipeline_Example&#xA;" posX="1382" posY="271" sourceCode="" type="String" source="true" loopIndex="false">
                         <authors>
                                 <author fullName="Ivo Dinov" email="" website="" />
                         </authors>
@@ -9406,7 +9413,7 @@
                                 <value>--no-save</value>
                         </values>
                 </dataModule>
-                <module id="RankingMSEandDrawinghistograms_1" name="Ranking MSE and Drawing histograms" package="R" version="3.3.1" description="This is just an example of an R-script invocation via the Pipeline Environment.&#xA;&#xA;See: /ifs/ccb/data/ADNI_Data_2010/R_Pipeline_Example" icon="0" posX="1899" posY="240" rotation="1" sourceCode="" location="pipeline://cranium.loni.usc.edu//ifshome/shobel/R-3.3.1/bin/R" executableVersion="1.0">
+                <module id="RankingMSEandDrawinghistograms_1" name="Ranking MSE and Drawing histograms" package="R" version="3.3.1" description="This is just an example of an R-script invocation via the Pipeline Environment.&#xA;&#xA;See: /ifs/ccb/data/ADNI_Data_2010/R_Pipeline_Example" icon="0" posX="1462" posY="348" rotation="1" sourceCode="" location="pipeline://cranium.loni.usc.edu//ifshome/shobel/R-3.3.1/bin/R" executableVersion="1.0">
                         <authors>
                                 <author fullName="Simeone Marino" email="" website="" />
                         </authors>
@@ -9442,10 +9449,11 @@
                                 <format type="Number" cardinality="1" />
                         </input>
                 </module>
-                <dataModule id="FEATUREMININGDATACONSOLIDATION_1" name="FEATURE MINING &amp; DATA CONSOLIDATION" package="LONI" version="1.0" description="Name of the exacutable R script which is to be run in batch mode&#xA;&#xA;See: /ifs/ccb/data/ADNI_Data_2010/R_Pipeline_Example&#xA;" posX="1701" posY="65" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="FEATUREMININGDATACONSOLIDATION_1" name="FEATURE MINING &amp; DATA CONSOLIDATION" package="LONI" version="1.0" description="Name of the exacutable R script which is to be run in batch mode&#xA;&#xA;See: /ifs/ccb/data/ADNI_Data_2010/R_Pipeline_Example&#xA;" posX="1330" posY="190" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <authors>
                                 <author fullName="Ivo Dinov" email="" website="" />
                         </authors>
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Wed Aug 11 21:23:40 PDT 2010" />
                         </metadata>
@@ -9460,7 +9468,7 @@
                                 <filetype name="R script" extension="R" description="R type" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost/C:\Users\simeonem\Documents\CBDA-SL\Cranium\Data_Consolidation_MSE_FeatureMining_V14_ABIDE.R</value>
+                                <value>pipeline://localhost/C:\Users\simeonem\Documents\CBDA-SL\Cranium\Data_Consolidation_MSE_FeatureMining_V16_ABIDE.R</value>
                         </values>
                 </dataModule>
         </moduleGroup>
