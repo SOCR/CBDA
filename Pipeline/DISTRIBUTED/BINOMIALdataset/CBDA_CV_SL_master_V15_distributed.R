@@ -106,20 +106,17 @@ Ytemp_sub <- Ytemp[-1*q] # define the output for learning by eliminating the q s
 
 # STEPS 5 and 6 ADD LIBRARIES
 # Specify new SL prediction algorithm wrappers 
-SL.glmnet.0 <- function(..., alpha = 0){
-  SL.glmnet(..., alpha = alpha)
-} # ridge penalty
+k=1
+# create glmnet functions for alpha in (0,1) by .05, but interval can be changed
+# save vector of names to pass into library of SL
 
-SL.glmnet.0.25 <- function(..., alpha = 0.25){
-  SL.glmnet(..., alpha = alpha)
-}
-
-SL.glmnet.0.50 <- function(..., alpha = 0.50){
-  SL.glmnet(..., alpha = alpha)
-}
-
-SL.glmnet.0.75 <- function(..., alpha = 0.75){
-  SL.glmnet(..., alpha = alpha)
+SL.glm_names = c()
+ind = 1
+for (k in seq(0,.95,.05)){
+  eval(parse(text = paste0("SL.glmnet.", k, " <- function(..., alpha = ", k, "){SL.glmnet(..., alpha =", k,")}")))
+  temp <- eval(as.character(parse(text = paste0("SL.glmnet.", k))))
+  eval(parse(text = paste0("SL.glm_names[", ind, "] <- temp")))
+  ind = ind + 1
 }
 
 SL.gam.1<-function(...,control=gam.control(deg.gam=1)){
@@ -219,9 +216,9 @@ predict.SL.bartMachine <- function(object, newdata, family, X = NULL, Y = NULL,.
 #                 "SL.glmnet","SL.glmnet.0","SL.glmnet.0.25","SL.glmnet.0.50","SL.glmnet.0.75",
 #                 "SL.svm",
 #                 "SL.randomForest","SL.bartMachine")
-SL.library <- c("SL.glm",
-                "SL.glmnet","SL.glmnet.0","SL.glmnet.0.25","SL.glmnet.0.50","SL.glmnet.0.75",
-                "SL.svm","SL.randomForest","SL.bartMachine")
+
+SL.library <- c("SL.glm", SL.glm_names,
+                "SL.svm","SL.randomForest","SL.bartMachine", "SL.logreg", "SL.bayesglm")
 
 ## Assess the dimensions of the normalized data matrix
 coordSL=dim(Xnorm_sub)
@@ -237,6 +234,8 @@ Kcol_max <- arguments[i_exp,4]
 Nrow_min <- arguments[i_exp,5]
 Nrow_max <- arguments[i_exp,6]
 range_n <- eval(parse(text=paste0("c(\"",Nrow_min,"_",Nrow_max,"\")")))
+Kcol_min=1
+Kcol_max = 1
 range_k <- eval(parse(text=paste0("c(\"",Kcol_min,"_",Kcol_max,"\")")))
 
 Kcol <- round(dim(Xnorm_sub)[2]*(runif(1,Kcol_min/100,Kcol_max/100))) # sample a value from a uniform distribution within 0.6 and 0.8 [number of rows/subjects between 60-80% of the big dataset]
