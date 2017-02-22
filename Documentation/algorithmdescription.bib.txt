@@ -1,0 +1,166 @@
+﻿@misc{lisher},
+   ISBN = {1544-6115},
+   year = {2002},
+   type = {Generic}
+}
+
+@article{RN18,
+   author = {Apostolova, L. G. and Dutton, R. A. and Dinov, I. D. and et al.},
+   title = {COnversion of mild cognitive impairment to alzheimer disease predicted by hippocampal atrophy maps},
+   journal = {Archives of Neurology},
+   volume = {63},
+   number = {5},
+   pages = {693-699},
+   ISSN = {0003-9942},
+   DOI = {10.1001/archneur.63.5.693},
+   url = {http://dx.doi.org/10.1001/archneur.63.5.693
+http://archneur.jamanetwork.com/data/Journals/NEUR/7044/NOC60009.pdf},
+   year = {2006},
+   type = {Journal Article}
+}
+
+@article{RN3,
+   author = {Breiman, L.},
+   title = {Random forests},
+   journal = {Machine Learning},
+   volume = {45},
+   number = {1},
+   pages = {5-32},
+   ISSN = {0885-6125},
+   DOI = {Doi 10.1023/A:1010933404324},
+   url = {<Go to ISI>://000170489900001},
+   year = {2001},
+   type = {Journal Article}
+}
+
+@article{RN6,
+   author = {Chang, C. C. and Lin, C. J.},
+   title = {LIBSVM: A Library for Support Vector Machines},
+   journal = {Acm Transactions on Intelligent Systems and Technology},
+   volume = {2},
+   number = {3},
+   ISSN = {2157-6904},
+   DOI = {Artn 27
+10.1145/1961189.1961199},
+   url = {<Go to ISI>://WOS:000208617000010},
+   year = {2011},
+   type = {Journal Article}
+}
+
+@book{RN7,
+   author = {Fox, John and Weisberg, Sanford and Fox, John},
+   title = {An R companion to applied regression},
+   publisher = {SAGE Publications},
+   address = {Thousand Oaks, Calif.},
+   edition = {2nd},
+   pages = {xxii, 449 p.},
+   ISBN = {9781412975148 (pbk.)
+141297514X (pbk.)},
+   year = {2011},
+   type = {Book}
+}
+
+@book{RN8,
+   author = {Hastie, Trevor and Tibshirani, Robert},
+   title = {Generalized additive models},
+   publisher = {Chapman and Hall},
+   address = {London ; New York},
+   edition = {1st},
+   series = {Monographs on statistics and applied probability},
+   pages = {xv, 335 p.},
+   ISBN = {0412343908},
+   year = {1990},
+   type = {Book}
+}
+
+@book{RN9,
+   author = {Hastie, Trevor and Tibshirani, Robert},
+   title = {Generalized additive models},
+   publisher = {Chapman & Hall/CRC},
+   address = {Boca Raton, Fla.},
+   pages = {xv, 335 p.},
+   ISBN = {0412343908},
+   url = {Publisher description http://www.loc.gov/catdir/enhancements/fy0916/99015185-d.html},
+   year = {1999},
+   type = {Book}
+}
+
+@article{RN10,
+   author = {Kapelner, Adam and Bleich, Justin},
+   title = {bartMachine: Machine Learning with Bayesian Additive Regression Trees},
+   journal = {Journal of Statistical Software},
+   volume = {70},
+   number = {4},
+   year = {2016},
+   type = {Journal Article}
+}
+
+@article{RN11,
+   author = {Karatzoglou, A. and Meyer, D. and Hornik, K.},
+   title = {Support Vector Machines in R},
+   journal = {Journal of Statistical Software},
+   volume = {15},
+   number = {9},
+   ISSN = {1548-7660},
+   url = {<Go to ISI>://WOS:000236800500001},
+   year = {2006},
+   type = {Journal Article}
+}
+
+@article{RN12,
+   author = {Stekhoven, D. J. and Buhlmann, P.},
+   title = {MissForest--non-parametric missing value imputation for mixed-type data},
+   journal = {Bioinformatics},
+   volume = {28},
+   number = {1},
+   pages = {112-8},
+   ISSN = {1367-4811 (Electronic)
+1367-4803 (Linking)},
+   DOI = {10.1093/bioinformatics/btr597},
+   url = {http://www.ncbi.nlm.nih.gov/pubmed/22039212},
+   year = {2012},
+   type = {Journal Article}
+}
+
+@book{RN13,
+   author = {Venables, W. N. and Ripley, Brian D. and Venables, W. N.},
+   title = {Modern applied statistics with S},
+   publisher = {Springer},
+   address = {New York},
+   edition = {4th},
+   series = {Statistics and computing},
+   pages = {xi, 495 p.},
+   ISBN = {0387954570 (alk. paper)},
+   url = {Table of contents http://www.loc.gov/catdir/toc/fy042/2002022925.html
+Publisher description http://www.loc.gov/catdir/enhancements/fy0812/2002022925-d.html},
+   year = {2002},
+   type = {Book}
+}
+
+@book{RN14,
+   author = {Wood, Simon N.},
+   title = {Generalized additive models : an introduction with R},
+   publisher = {Chapman & Hall/CRC},
+   address = {Boca Raton, FL},
+   series = {Texts in statistical science},
+   pages = {xvii, 391 p.},
+   ISBN = {1584884746 (acid-free paper)
+9781584884743},
+   url = {Publisher description http://www.loc.gov/catdir/enhancements/fy0702/2006040209-d.html},
+   year = {2006},
+   type = {Book}
+}
+
+@article{RN15,
+   author = {Zou, H. and Hastie, T.},
+   title = {Regularization and variable selection via the elastic net (vol B 67, pg 301, 2005)},
+   journal = {Journal of the Royal Statistical Society Series B-Statistical Methodology},
+   volume = {67},
+   pages = {768-768},
+   ISSN = {1369-7412},
+   DOI = {DOI 10.1111/j.1467-9868.2005.00527.x},
+   url = {<Go to ISI>://WOS:000233203400009},
+   year = {2005},
+   type = {Journal Article}
+}
+

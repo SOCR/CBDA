@@ -1,0 +1,491 @@
+---
+title: "Algorithm Description V_2"
+author: "SOCR CBDA Team"
+date: "August 1, 2016"
+output: pdf_document
+csl: apa.csl
+bibliography: algorithmdescription.bib
+---
+
+
+
+
+#SuperLearner Function
+##SL.library: Algorithms description 
+###Notations:
+*	X: a predictors column-joined.
+*	Y: the response variable.
+* k: the number of predictors.
+* n: the number of observations.
+    [see @bibtex for details]
+
+### Generalized linear model (GLM)
+GLM is a fitting generalized linear models, specified by giving a symbolic description of the linear predictor and a description of the error distribution. This algorithm could be used on both categorical or discrete variables and continuous variables. In the meantime, instead of assuming that the responses should conform to normally distribution, the response variables could from any exponential families.
+
+####Advantages:
+*	This model could extend the linear model to problems in which the response is categorical or discrete rather than a continuous numeric variable. GLM does not assume a linear relationship between the dependent variable and the independent variables, but it does assume linear relationship between the transformed response in terms of the link function and the explanatory variables.
+* In the Generalized Linear Model (GLM), the response variable may not normally distributed, $\epsilon \neq N(0,\sigma^2)$. For instance, the response variable may be binary (logistic model). GLM addresses these cases – e.g., GLM logit and probit models are GLM special cases appropriate for dichotomous or polytomous variables.
+
+####Assumptions:
+The data $Y_1 ,\cdots,Y_N$ are independently distributed and are assumed from an exponential family.
+
+####Notations:
+$\beta^T=(b_0,b_1 ,\cdots,b_k)$: The parameters of the linear predictor. GLM are typically fit to data by the method of **maximum likelihood**, using **iteratively weighted least squares procedure**. 
+
+####Model components:
+*	A random component  
+  The random component specifies the conditional distribution of the response variable, y, given the predictors. The conditional distributions are from an exponential family. 
+*	A linear predictor $\eta=X\beta$   
+  $\eta(x)=\beta_{0}+\beta_{1}x_1+\cdots+\beta_{k}x_k$: $\eta(x)$ is the value of the linear predictor. $\hat{\eta}$ (x) represents the estimated value of the linear predictor.
+
+Hence, the GLM models is shown as followed $$Y=\beta_{0}+\beta_{1}x_1+\cdots+\beta_{k}x_k+ \epsilon, \epsilon \neq N(0,\sigma^2)$$
+
+*	A link function $$g[\mu(x)]=\eta(x)$$  
+The link function enables the connection of the predictor structural component to the response variable, since in some case $\eta(x)$ may take on any value in $(-\infty,\infty)$, whereas the mean of a binary random variable must be in the interval (0,1). The link function translates from the scale of the mean response to the scale of the linear predictor.  
+$\mu(x)$  is the mean of a conditional response distribution at a given point in the covariate space and $\eta(x)$ is the result predicted from the linear predictor.  
+    
+    The link function is important as it specifies the distribution of the response    variable- e.g., "identify link" for normal and non-identity link function for non-normally distributed responses.    
+    The choice of the link function is important and should be based on:   
+  1)	Knowledge of the response distribution,   
+  2)	Theoretical process assumptions, and   
+  3)	Empirical fit to the data.     
+      
+    P.S. : In R, the glm function includes a family-generator function, which could match link functions to five standard exponential families automatically. Each family has its own canonical link, which is used by default if a link is not given explicitly.  
+    
+    
+| *Family* |	*Default link* |	*Range of y* |	*Var(y│x)* |
+|:--------:|:---------------:|:-------------:|:-----------:|
+|gaussian  |	identity	     |$(-\infty,+\infty)$	       |   $\Phi$         |
+|binomial  |	logit	         |$\frac{(0,1,\cdots,N)}{N}$|$\frac{\mu(1-\mu)}{N}$ |
+|  poisson |	log	 |$0,1,2,\cdots$	|$\mu$|
+|Gamma|	Inverse|	(0,$+\infty$)|	$\Phi \mu^{2}$|
+|inverse.gaussian|	$\frac{1}{\mu^2}$| 	$(0,+\infty)$	|$\Phi \mu^{3}$|  
+
+####Statistical Analysis:
+Assume the estimated value of the linear predictor as $\hat{\eta} (x)=b_0+b_1 x_1+\cdots+b_kx_k$  
+*	The estimated mean of the response is $\hat{\mu} (x)=g^{-1} [\hat{\eta} (x)]$, because of the link function $g[\mu(x)]=\eta(x)$.  
+*	The variance of distribution is $var(y│x)=\Phi \times v[\mu(x)]$,
+$\Phi$ is the positive dispersion parameter related to the variance of the exponential family. For the binomial and poisson distributions, the dispersion parameter equal to 1, for Gaussian data, the parameters could be replaced by $\sigma^2$.  
+  
+[see @RN7 for details]
+
+      
+
+###Generalized additive models (GAM)
+GAM is a generalized linear model with a linear predictor, involving a sum of smooth functions of covariates. GAM in R uses **the backfitting algorithm** to combine different smoothing or fitting methods. **The Gauss-Seidel methods** are used to fit additive models by iteratively smoothing partial residuals. The smoothing or fitting methods currently supported are local regression and smoothing splines.  
+    
+    
+####Advantages:
+The model allows for rather flexible specification of the dependence of the response on the covariates by specifying the model only in terms of "smooth functions", rather than detailed parametric relationships.  
+  
+####Notation:
+*	$f_i (x_i )$: The smooth function for $x_i$ (feature i).  
+
+####GAM in R:
+In general the model has a structure like
+$$g(E(Y))=\beta_0+f_1 (x_1 )+\cdots+f_k(x_k)$$where Y  \sim some exponential family distribution.   
+
+**A Gauss-Seidel method**:fitting additive models by iteratively smoothing partial residuals  
+  
+The pseudo algorithm for this method is shown as follow.    
+    Suppose the function is $y=\beta_0+f_1 (x_1 )+\cdots +f_k(x_k)$  
+    1) Set $\hat{\beta}_0= E(Y)$  and $\hat{f}_j=0$ for $j=1,\cdots,k$.  
+    2) Repeat steps 3 to 5 until the estimates, $\hat{f}_j$, stop changing.  
+    3) For $j=1,\cdots,k$ repeat steps 4 and 5.  
+    4) Calculate partial residuals:$e_m^j=y-\hat{\beta}_0+\sum^{(t≠j)} \hat{f}_t$  
+    5)Set $\hat{f}_j$ equal to the result of smoothing $e_m^j$ with respect to $x_j$.  
+    
+####The smoothing or fitting methods:
+#####local regression: 
+Combining much of the simplicity of linear least squares regression with the flexibility of nonlinear regression. It does this by fitting simple models to localized subsets of the data and building up a function that describes the deterministic part of the variation in the data, point by point.  
+    
+Local regression model also be known as locally weighted polynomial regression. The polynomial is fitted using weighted least squares, giving more weight to points near the point whose response is being estimated and less weight to points further away.  
+The traditional weight function is the tri-cube weight function
+$$w(x)=(1-|x|^3)^3 I[|x|<1]$$  
+    
+    
+#####Smoothing splines:
+The smoothing splines would circumvent the problem of knot selection, and simultaneously, they control for over-fitting by shrinking the coefficients of the estimated function.  
+The estimators perform a regularized regression over the natural spline basis, placing knots at all points $x_{1,m},\cdots,x_{n,m}$,$m=1,\cdots,k$.  
+Suppose the function is $y=\sum_{(j=1)}^n\beta_j g_j$, where $g_j$ are the truncated power basis functions for natural splines with knots at $x_{1,m},\cdots,x_{n,m}$.(the natural splines are only defined for odd orders )  
+The coefficients are chosen , in order to minimize
+$$‖y-G\beta‖_2^2+\lambda \beta^T \Omega \beta$$
+where $G\in R^{(n \times n)}$  is the basis matrix defined as 
+$$G_{ij}=g_j (x_{i,k} )$$ $i,j=1,\cdots,n$,
+and $\Omega \in R^{(n \times n)}$ is the penalty matrix defined as 
+$$\Omega_{ij}=\int {g_i^{''} (t)g_j^{''}(t)}dt, i,j=1,\cdots,n$$
+Given the optimal coefficients $\hat{\beta}$ minimizing $‖y-G\beta‖_2^2+\lambda\beta^T \Omega\beta$, the smoothing spline estimate at x is defined as 
+$$\hat{r}(x)=\sum_{(j=1)}^n\hat{\beta}_j g_j (x).$$  
+    
+*	The parameter $\lambda\ge0$ is a tuning parameter , often called the smoothing parameter. The higher the value of $\lambda$, the more shrinkage.  
+*	Similar to least square regression, the $\hat{\beta}$ is equal to $$\hat{ \beta }=(G^T G+\lambda G)^{-1} G^T y$$
+*	Hence, $$\hat{r} (x)=\sum_{j=1}^n \hat{\beta_j} g_j (x)=g(x)^T \hat{\beta} =g(x)^T (G^T G+\lambda G)^{-1} G^T y$$  
+
+####deg.gam
+In our experiment, we choose different values of deg.gam. This notation represents the maximum degree of the polynomial function that going to be applied during the smoothing splines procedure.  
+The default value of this is 2, but we reset this value equal to 1,2,3,4,5, respectively.  
+
+[see @RN9 for details]  
+[see @RN13 for details]  
+[see @RN14 for details]  
+ 
+    
+  
+###A generalized linear model with lasso or elastic net regularization （GLMNET）
+GLMNET is a model, which fit a generalized linear model via penalized maximum likelihood. The regularization path is computed for the **lasso** or **elastic net** penalty at a grid of values for the regularization parameter lambda. This model can deal with all shapes of data, including vary large sparse data matrices. Fits linear, logistic and multinomial, poisson, and Cox regression models.  
+
+####Model component:
+**The GLM part**: the GLM functions for different families are different.  
+For “Gaussian” family is
+$$\frac{1}{2} \times \frac{1}{(observations)}RSS$$
+For the other models are  
+$$\frac{(-loglik)}{(observations)}$$
+
+**The penalty:**
+$$\frac{(1-\alpha)}{2} ‖\beta‖_2^2+\alpha‖\beta‖_1$$
+when $\alpha=1$,the penalty becomes the lasso penalty,  
+when $\alpha=0$,the penalty becomes the ridge penalty.  
+
+####Objective functions:  
+For "Gaussian" family is
+$$\frac{1}{2} \times \frac{1}{(observations)}RSS++\lambda \times penalty$$
+For the other models are  
+$$\frac{(-loglik)}{(observations)}+\lambda \times penalty$$  
+
+####$\lambda$: The shrinkage parameter
+The value of $\lambda$ has direct relationship with the final result. For instance, in ridge regression,$\lambda$ controls the size of the coefficients and amount of regularization.  
+If $\lambda\downarrow0$, we could obtain the least squares solutions.  
+If $\lambda\uparrow\infty$, the estimate parameters we get could tend to 0.  
+In R, the default value of $\lambda$ is a sequence of number. Systems will choose 100 different $\lambda$ and the default number of the smallest value of the $\lambda$ depends on the sample size relative to the number of the variables. If k> n , the default is 0.0001, on contrast, the default is 0.01.  
+
+####The penalty:
+#####	LASSO Regularization 
+when $\alpha=1$,the penalty is the lasso penalty,the objective function is   
+$$\beta=arg min_\beta {\sum_{i=1}^n(y_i-\beta_0-\sum_{j=1}^k x_{ij} \beta_j )^2+\lambda\sum_{j=1}^k \Vert\beta_j\Vert_1}$$
+
+######Advantage:
+Owing to the nature of the $l_1$-penalty, the lasso could both continuous shrinkage and automatic variable selection simultaneously.  
+
+######Limitation:
+*	When the k>n, the lasso selects at most n variables before it saturates, because of the convex optimization problem. Moreover, the lasso is not well defines unless the bound on the $l_1$-norm of the coefficients is smaller than a certain value.
+*	If there is a group of variables among which the pairwise correlations are very high, then the lasso tends to select only one variable form the group and does not care which one is selected.  
+
+#####	Ridge penalty
+When $\alpha=0$,the penalty is the ridge penalty,the function is 
+$$\beta=arg min_\beta {\sum_{i=1}^n(y_i-\beta_0-\sum_{j=1}^k x_{ij} \beta_j )^2+\frac{\lambda}{2}\sum_{j=1}^k \Vert\beta\Vert_2^2 }$$
+
+######Advantage:
+As a continuous shrinkage method, ridge regression achieves its better prediction performance through a bias- variance trade off.  
+
+######Limitation:
+Since it always keeps all the predictors in the model, this regression method could not produce a parsimonious model.  
+
+#####	Elastic net 
+The penalty of elastin net is
+$$\frac {(1-\alpha)}{2} \Vert\beta\Vert_2^2+\alpha \Vert\beta\Vert_1$$
+which is a convex combination of the lasso and ridge penalty.  
+The elastic net simultaneously does automatic variable selection and continuous shrinkage, and it can select groups of correlated variables.  
+The objective function turns to  
+$$\beta=arg min_\beta {\sum_{i=1}^n(y_i-\beta_0-\sum_{j=1}^k x_{ij} \beta_j )^2+\lambda_2 \Vert\beta\Vert_2^2+\lambda_1 \Vert\beta\Vert_1}$$
+
+**Lemma**: Given data set (y,X) and$(\lambda_1,\lambda_2)$, define an artificial data set $(y^*, X^*)$ by
+$$X_{(n+k)\times k}^*=(1+\lambda_2 )^{(-1/2)} \begin{pmatrix}X\\\sqrt{\lambda_2 } I\\\end{pmatrix},y_{(n+k)}^*=\begin{pmatrix}y\\0\\ \end{pmatrix}.$$
+Let $\gamma=\frac{(\lambda_1)}{(\sqrt{1+\lambda_2})}$  and $\beta^*=\sqrt{1+\lambda_2}\beta$. The elastic net criterion can be written as $$\hat{\beta}^*=arg min_{\beta^*} {|y^*-X^*  \beta^* |^2+\gamma|\beta^* |_1}$$
+According to the lemma, this function could be transformed into an equivalent LASSO problem and then be solved.  
+
+####Alpha
+Since the value of alpha has directly relationship with the penalty, we choose different value of alpha to expand this algorithm. The default value of alpha is 1, but we apply 0, 0.25, 0.5, 0.75 and 1 to configure different penalty of this algorithm.  
+
+
+[see @RN15 for details]  
+
+
+
+###Classification and regression with Random Forest (Random Forest) 
+####Procedures of Constructing Random forest 
+In Random Forest, a tree is a classifier and the purpose of this algorithm is using different sub data set to construct a number of trees and form a forest. After a large number of trees are generated, they vote for the most popular class for an input vector and give prediction.  
+For instance, when generate the $m_{th}$ tree, a random vector $\theta_m$ is generated, which is independent of the past random vectors $\theta_1,\theta_2,\cdots,\theta_{(m-1)}$ but with the same distribution. And a tree is grown using the training set and $\theta_m$, resulting in a classifier $h(x,\theta_m)$, where x is an input vector.Then each tree casts a unit vote for the most popular class at input x.  
+  
+  
+####Advantage:
+*	Random forests do not overfit as more trees as added.
+*	Since each tress is constructed independently, random forests have lower correlation between classifiers.    
+  
+  
+####Some parameters used to expand this algorithm
+**ntree**: the number of trees to grow. This should not be set to too small a number to ensure that every input row gets predicted at least a few times.   Significant improvements in classification accuracy have resulted from growing an ensemble of trees and letting them vote for the most popular class.  
+**mtry**: the number of variables randomly sampled as candidates at each split. The default values are different for classification ($\sqrt{k}$ )and regression($\frac{k}{3}$).   
+**maxnode**: maximum size of terminal nodes. Setting this number larger causes smaller trees to be grown and thus take less time. The default values for classification is 1 and for regression is 5.  
+
+[see @RN3 for details]  
+
+
+###Support vector machines (SVM)
+svm is used to train a support vector machine. It can be used to carry out general regression and classification, as well as density- estimation.  
+
+####Description
+#####Kernel function    
+    1.	In classification, SVM separate the different classes of data by a hyper-plane
+$$〈\Phi(x),w〉+b=0$$   
+$\Phi$ is a mapping of the inputting data into a high-dimensional feature space.  
+Hence the decision function $$f(x)=sign〈\Phi(x),w〉+b$$  can be used to represent the result of the classification.  
+suppose we have 2 classes, f(x)=1, when x belong to one class OR f(x)=-1, when otherwise.  
+It can be shown that the optimal hyper-plane is the one with the maximal margin of the separation between the two classes.    
+
+2.**Maximum margin classifier**
+We suppose the hyper-lane could be represents as $〈\Phi(x),w〉+b$, hence the distance from a point to this lane is $\frac{f(x)}{\Vert w\Vert}$. The geometrical margin could be represent as $\gamma=y\frac{f(x)}{\Vert w\Vert}$   and the objective function becomes to
+$$max  \gamma=y \frac{f(x)}{\Vert w\Vert}$$  
+$$s.t.y_i (w^T \Phi(x_i )+b)=y_i f(x_i )\ge\gamma\Vert w\Vert  (i=1,2,\cdots,n)$$  
+  
+  
+We could simplify this function to 
+$$max \gamma=\frac{1}{\Vert w\Vert}$$   
+$$s.t.y_i (w^T \Phi(x_i )+b)=y_i f(x_i )\ge1 (i=1,2,\cdots,n)$$  
+
+since our objective is to find the parameters w and b.
+
+This function could be transferred to convex quadratic programming as followed
+$$min \gamma=\frac{1}{2}  \Vert w\Vert^2$$
+$$s.t.y_i (w^T \Phi(x_i )+b)=y_i f(x_i )\ge1 (i=1,2,\cdots,n)$$  
+
+Considering the outliers, we could revise this formula to
+$$min \gamma=\frac{1}{2}  \Vert w\Vert^2+\frac{C}{n} \sum_{i=1}^n\xi_i$$ 
+$$s.t.y_i (w^T \Phi(x_i )+b)=y_i f(x_i )\ge1-\xi_i  (i=1,2,\cdots,n)$$
+$$\xi_i\ge0 (i=1,2,\cdots,n)$$  
+
+Adding Lagrange Duality, 
+$$L(w,b,\xi,\alpha,r)=\frac{1}{2}  \Vert w\Vert^2+\frac{C}{n} \sum_{i=1}^n\xi_i -\sum_{i=1}^n\alpha_i (y_i (w^T \Phi(x_i )+b)-1+\xi_i)-\sum_{i=1}^nr_i \xi_i $$  
+This problem becomes to $$min_{(w,b)} max_{(\alpha_i\ge0) }L(w,b,\xi,\alpha,r)$$
+The dual form of this formulation is $$max_{(\alpha_i\ge0)} min_{(w,b)} L(w,b,\xi,\alpha,r)$$    
+    3.	Solve dual form of the formulation  
+Through derivation and SMO, we could transfer this formula to   
+
+$$max \sum^{i=1}n\alpha_i-\frac{1}{2}\sum^{i,j=1}n\alpha_i \alpha_j y_i y_j \Phi(x_i )^T \Phi(x_j )  $$
+$$s.t.  0\le\alpha_i\le\frac{C}{n}  (i=1,2,\cdots,n)   $$
+$$\sum_{i=1}^m\alpha_i y_i=0.$$
+
+This is C-SVM.  
+
+####Kernel function 
+A kernel function return the inner product between two points in a suitable feature space, thus defining a notion of similarity, with little computational cost even in very high dimensional spaces.  
+The four kernel functions used in R is shown as followed.  
+
+|*Linear Kernel*|$x'x$|
+|:-----------:|:-----:|
+|*Polynomial Kernel*|$(\gamma x'x+coef0)^deg$|
+|*Radial Basis Kernel*|$exp(-\gamma|x'x|^2)$|
+|*Sigmoid Kernel*|$tanh(\gamma x'x+coef0$)|  
+
+####Advantages:  
+Since the quadratic programming problem and the final decision function depend only on dot products between patterns, with the help of kernel function, the inside dot product can be represented by a kernel function k,
+$$k(x,x' )=〈\Phi(x),\Phi(x')〉$$
+we could practically work in space of any dimension without any significant additional cost, as the "kernel trick".  
+	In the meantime, with kernel function, SVM could generalize the linear algorithm to the non-linear cases.  
+	When deal with multi-class classification, SVM applies one-against-one method. Although this suggests a higher number of support vector machines to train the overall CPU time used id less compared to the onr-against-all method since the problems are smaller and the SVM optimization problem scales super-linearly.  
+
+####Model component
+The default setting for the SCM is c-classification or eps-regression, depending on whether the response variable is a factor or not. 
+
+####C-classification
+The dual form of the bound constraint C-SVM formulation is:
+$$max W(\alpha)=\sum_{i=1}^n\alpha_i-\frac{1}{2}\sum_{i,j=1}^n\alpha_i \alpha_j (y_i y_j+k(x_i,x_i ))   $$
+$$s.t.0\le\alpha_i\le\frac{C}{n} (i=1,2,\cdots,n)     $$
+$$\sum_{i=1}^n\alpha_i y_i=0.$$  
+
+
+####Some parameters used to expand this algorithm 
+**Type**: svm can be used as a classification machine, as a regression machine, or for novelty detection. Depending of whether y is a factor or not, the default setting for type is C-classification or eps-regression, respectively, but may be overwritten by setting an explicit value.  
+Valid options are:  
+*  C-classification  
+* 	nu-classification  
+*  one-classification (for novelty detection)  
+*	 eps-regression  
+*	 nu-regression    
+
+**Degree**: the parameter needed for kernel of type polynomial. The default value of this is 3.
+
+**Gamma**: the parameter needed for all kernels except linear. The default value of this is $\frac{1}{data}$ dimension.
+
+**Coef0**: parameter needed for kernels of type polynomial and sigmoid. The default value of this is 0.
+
+**Cost**: cost of constraints violation. The default value of this is 1. 
+A high cost value C will force the SVM to create a complex enough prediction function to misclassify as few training points as possible, while a lower cost parameter will lead to simpler prediction function.
+
+**Nu**: since in R, the type could transfer to nu-classification as well, we could change this value.  
+For nu-classification, the dual formulation becomes
+$$maxW(\alpha)=\frac{-1}{2}\sum _{i,j=1}^n\alpha_i \alpha_j y_i y_j k(x_i,x_i )$$
+$$s.t.0\le\alpha_i\le\frac{1}{n} (i=1,2,\cdots,n)     $$
+$$\sum_{i=1}^n\alpha_i y_i=0   $$
+$$\sum_{i=1}^n\alpha_i \ge ν$$    
+
+the ν parameter has the interesting property of being an upper bound on the training error and a lower bound on the fraction of support vectors found in the data set, thus controlling the complexity of the classification function build by the SVM.  
+
+**Chang, C. C., & Lin, C. J. (2011). LIBSVM: A Library for Support Vector Machines. Acm Transactions on Intelligent Systems and Technology, 2(3). doi:Artn 27
+10.1145/1961189.1961199**  
+[see @RN11 for details]  
+
+
+###Machine learning with Bayesian additive regression trees(BARTMACHINE)
+BART is a Bayesian approach to nonparametric function estimation using regression trees. BART can be considered a sum-of-trees ensemble, with a novel estimation approach relying on a fully Bayesian probability model.  
+As a Bayesian model, BART consists of a set of priors for the structure and the leaf parameters and a likelihood for data in the terminal nodes. The aim of the priors is to provide regularization, preventing any single regression tress from dominating the total fit. BARTMACHINE introduces many new features for data analysis using BART.
+
+###Model component:
+$$Y=f(x)+\epsilon \approx T_1^M (X) +T_2^M (X)+\cdots+T_m^M (X)+\epsilon,  \epsilon \sim N_n (0,\sigma^2 I_n )$$
+where Y is the $n\times1$ vector of responses, X is the $n\times p$ matrix (the predictors column-joined) and $\epsilon$ is the $n\times1$ vector of noise. M is the number of the distinct regression trees, each composed of a tree structure, denoted by T, and the parameters at the terminal nodes, denoted by M. Hence $T^M$ represents an entire tree with both its structure and set of leaf parameters. The set of the tree’s leaf parameters is denoted as $M_t={\mu_{t,1},\mu_{t,2},\cdots,\mu_{t,b_t} }$ where $b_t$ is the number of terminal nodes for a given tree. The observation’s predicted value is the sum of the m leaf values arrived at by recursing down all m trees.
+    
+####Priors and likelihood
+The prior for the BART model has three components:  
+*  The tree structure itself  
+*	 The leaf parameters given the tree structur  
+*  The error variance $\sigma^2$  which is independent for the tree structure and leaf parameters  
+Assume that the conditional independence of the leaf parameters given the tree’s structure.  
+$$P(T_1^M,\cdots,T_M^M,\sigma^2 )=[\prod^{t} P(T_t^M ) ]P(\sigma^2 )=[\prod^{t} P(M_t│T_t )P(T_t ) ]P(\sigma^2 )=[\prod^{t} \prod^{l}P(\mu_{t,l}│T_t )P(T_t ) ]P(\sigma^2 )$$  
+  
+**$P(T_t )$**:This prior component affects the locations of nodes within the trees.  
+**Node depth** represents the distance from the root. Nodes at depth d are nonterminal with prior probability **$\alpha(1+d)^{-\beta}$**,where $\alpha\in(0,1)$,and $\beta\in[0,\infty]$.  This component of the tree structure prior aims to enforce shallow tree structures, thereby limiting complexity of any single tree and resulting in more model regularization. The default number for this is $\alpha=0.95$,$\beta=2$.  
+For nonterminal nodes, unlike original formulation, where each available predictor has equal probability to be selected, in BART, this is relaxed to allow for a 
+**generalized Bernoulli distribution**, where the user could specifies $p_1,p_2 ,\cdots,p_p,(\sum_{j=1}^p p_j=1)$, where each denotes the probability of the jth variable being selected a priori.    
+  
+**$P(M_t│T_t )$**: This prior component controls the leaf parameters. When giving the set of terminal nodes, each terminal node has a leaf parameter representing the "best guess" of the response in this partition of predictor space. The prior on each of the leaf parameters is given as: $\mu_l \sim N(\frac{\mu_\mu}{m},\sigma_\mu^2 )$  
+$\mu_\mu=(\frac{y_{min}+y_{max}}{2})$. The variance $\sigma_\mu^2$  is chosen in order to make the range center plus or minus k variance cover 95% of the provided response values in the training set. The default value of k is 2. The aim of this prior is to provide model regularization by shrinking the leaf parameters toward the center of the distribution of the response. The larger the value of k, the smaller the value of $\sigma_\mu^2$, resulting in more model regularization.    
+  
+**$P(\sigma^2 )$**:this component of prior is on the error variance and is chosen to be $\sigma^2 \sim InvGamma(\frac{\upsilon}{2},\frac{\upsilon \lambda}{2})$.    
+  
+The default values of $\alpha,\beta,k,\upsilon$ has good performance, but optimal tuning can be achieved via cross-validation. Along with a set of priors, BART specifies the likelihood of responses in the terminal nodes. They are assumed a priori normal with the mean being the "best guess" in the leaf at the moment and variance being the best guess of the variance at the moment, $y_l \sim N(\mu_l,\sigma^2 ).$
+      
+####Posterior distribution and prediction
+A key feature of BART is to employ a form of "Bayesian backfitting", where the jth tree is fit iteratively, holding all other m-1 trees constant by exposing only the residual response that remains unfitted: $$R_{-j}≔y-\sum^{t \neq j} T_t^m (X)$$
+The procedure is shown as followed:
+$$T_1 | R_{-1},\sigma^2$$   
+$$M_1 | T_1,R_{-1},\sigma^2$$  
+$$T_2 | R_{-2},\sigma^2$$  
+$$M_2 | T_2,R_{-2},\sigma^2$$  
+$$\cdots\cdots$$  
+$$ T_m| R_{-m},\sigma^2$$    
+$$ M_m | T_m,R_{-m},\sigma^2 $$   
+$$\sigma^2 |T_1,M_1,\cdots,T_m,M_m, \epsilon$$
+First, proposing a change to the first tree’s structure T, which is accepted or rejected via a Metropolis-Hastings step, since the posterior of the tree structure does not depend on the leaf parameters. The revising include small perturbations to the tree structure: growing a terminal node by adding two child nodes, pruning two child nodes, or changing a split rule.    
+  
+Given the tree structure, the posterior then revise the leaf parameters. This procedure progresses iteratively for each tree, using the updated set of partial residuals $R_{-j}$. The posterior of each of the leaf parameters in M is conjugate normal with its mean being a weighted combination of the likelihood and prior parameters.  
+  
+Finally, conditional on the updates set of tree structure and leaf parameters, a draw from the posterior of $\sigma^2$ is made based on the full model residuals $$\epsilon=y-\sum_{t=1}^mT_t^m (X) $$   
+  
+All these steps represent a single Gibbs iteration. Generally, no more than 1,000 iterations are needed as burn-in(the default value of burn-in node is 250). a single predicted value f(x) can be obtained by taking the average of the posterior values and a quantile estimate can be obtained by computing the appropriate quantile of the posterior values.
+    
+####Advantages:
+* BARTMACHINE is fully parallelized during the model creation, prediction, and many of the other features.  
+* The BARTMACHINE package also implements the variable selection procedures, which are best applied to data problems where the number of covariates influencing the response is small relative to the total number of covariate.
+
+#####Some parameters used to expand this algorithm
+Like RandomForest algorithm, the main parameters we could used to expand this algorithm is  
+* num_trees: the number of trees to be grown in the sum-of-trees model.  
+
+[see @RN10 for details]  
+
+
+
+##SuperLearner Loop
+The super learner function takes a training set pair (X,Y) and returns the predicted values based on a validation set. With the V-fold cross validation theorem, this function could extent the candidate learner selector to include weighted averages of the candidate learners.  
+  
+###Algorithm:
+Step 0: train each candidate learner on entire dataset.  
+Step 1: Split data into v blocks.  
+Step 2: train each candidate learner.  
+Step 3: predict the outcomes in the validation block based on the corresponding training block candidate learner.  
+Step 4: model selection and fitting for the regression of the observed outcome onto the predicted outcomes from the candidate learners.  
+$$E(Y│Z)=m(z;\beta )$$
+$\beta$ is the coefficients of each candidate learners and z represents learners.  
+Step 5: evaluate super learner by combining predictions from each candidate learner with m(z;$\beta$).  
+  
+  
+Usually, the default method on estimating the coefficients for the super learner and the model to combine the individual algorithms in the library is NNLS.  
+
+####NNLS (The Lawson-Hanson algorithm for non-negative least squares): 
+y solving the problem $$argmin_x \VertAx-b\Vert_2, x\ge0$$ $$A\in R^{m\times n},x\in R^n,b\in R^m$$ 
+In fact, by using super learner, we could predict m subjects by n methods and b is the real value of this m subjects. With NNLS, we could find optimal x (the coefficients of different algorithms), which lead to min error.   
+In R, there always has a prescreen algorithms as well, which first rank the variables in X based on either a univeriate regression p-value of the randomForest variable importance. A subset of the variables in X is selected based on a pre-defined cut-off. With this subset of the X variables, the algorithm in SL.Library are then fit in.  
+  
+####Value
+* call: the configuration of this superlearner.  
+* libraryNames: a character vector with the names of the algorithmn in the library, including the risk and coefficient for them.  
+* SL.library: returns in the same format as SL.librart in the argument.  
+This will help us to have a clear mind about which algorithms are included in this superlearner function.
+* SL.predict:the predict value from the super learner.  
+* coef: the coefficients for all the algorithms including in the SL.library.  
+With the help of **coef**, we could compare the parameters(weighted) of each algorithm in the SL.library when obtaining the final super learner predicted value. Undoubtedly, the algorithm, whose parameter is larger than others, plays a more important role in predicting procedure, which means that this algorithm has fit better for this data set than others.
+* library.predict:a matrix with the predicted values from each algorithm in the SL.library.  
+* Z: a matrix with the cross-validation prdicted values from each algorithm in the SL.library.  
+* cvRisk: a numeric vector with the v-fold cross-validated risk estimate for each algorithm in the SL.library without the the CV risk estimate for the superlearner.  
+* family: return the information about the family and link function. Through this, we could check different variables' family and, maybe , make further improvements by changing their link functions.
+* futLibrary: a list with the fitted objects for each algorithm in SL.library on the full training data set.  
+* varNames: a character vector with the names of the variables in X.  
+* validRows: a list containing the row numbers for the v-fold cross-validation step.  
+* method: the method that used to combine algorithms in the SL.library to get superlearner prediction and compute error.We could change different methods and compare their computed error to get better prediction.  
+* whichScreen: a logical matrix indicating which variables passed each screening algorithm.  
+* Control: the control list.  
+* cvControl: the cvControl list.  
+* errorInCVLibrary: A logical vector indicating if any algorithms experienced an error within the CV step.  
+* errorsInLibrary: A logical vector indicating if any algorithms experienced an error on the full data.  
+  
+  
+  
+## Knockoff filter
+This is a new variable selection procedure, which could controll the FDR in the statistical model when the number of obervations is larger than the number of features.  
+    
+### step 1: construct knockoffs  
+The knockoff filtering method doubles the number of original features by introducing a null-feature $(\tilde{x}_j$) corresponding to each original feature $(x_j)$ in the design matrix X. These dummy (knockoff) variables serve as a “control group” that allows us to estimate the rate at which the regularized linear modeling generated false-positive results (i.e., a feature is declared statistically important, when in reality, it’s not, just like the knockoffs represent null-data).    
+    
+The knockoff variables are designed to   
+1.   Preserve the correlation structure of the observed original (real) data, i.e., $\tilde{x}_j^T \tilde{x}_k =x_j^T x_k$, for all j,k.  
+2.   Maintain the correlation between different original variables the same as those between knockoffs and distinct original features, i.e., $\tilde{x}_j^T x_k=x_j^T x_k$, for $j \neq k$.  
+This the new (augmented) design matrix we use in the regularized linear model will be
+$$[X \tilde{X}]=[x_1,x_2,\ldots,x_n,\tilde{x}_1,\tilde{x}_2,\ldots,\tilde{x}_n] \in R^{k \times (2n)}$$ 
+    
+Let $\Sigma =X^T X$ represent the Gram matrix of the original features. According to the conditions above, we could ensure that $\tilde{X}_T \tilde{X} = \Sigma$ as well. Then we define $X^T \tilde{X}= \Sigma - 2 \xi I_n$  
+The dummy knockoff features are defined to satisfy the 2 conditions above and to enable the decomposition of the symmetrized augmented design matrix:
+    $$[X \tilde{X}]^T [X \tilde{X}]= \begin{pmatrix} \Sigma & (\Sigma-2 \xi I_n) \\ (\Sigma-2 \xi I_n) & \Sigma \\ \end{pmatrix} $$
+      
+where the following definitions ensure the satisfaction of the two by-design conditions on the knockoffs above: $\Sigma =X^T X \sim \xi I_n$, is full rank, the knockoff features are derivatives of their real counterparts $\tilde{X}=X(I_n - 2\xi \Sigma)+UC$, the matrix $C^T C$ can be factorized using Cholesky decomposition into a lower triangular matrix (C) and its transpose $(C^T)$, and U is an orthonormal matrix $(U^T U=I)$ that is orthogonal to the original feature matrix $X (tr(U X^T )=0)$.   
+    
+### Calculate statsitics for each pair of original and knockoff variables
+We apply the LASSO model, and $l_1$ norm penalized regression to eatimates the coefficients $\beta.$  
+$$\tilde{\beta}(\lambda)=arg {min_b} {\frac{1}{2} \Vert y-(X \tilde{X}) b\Vert _2 ^2 + \lambda \Vert b _1} $$   
+    
+With this model, we could conclude that if variables $X_j$ enters the LASSO model early adn it does so before its knockoff copy $\tilde{X}_j$, then it means that this variable belongs to the model. Otherwise, it should not include to the model. Hence, we taking $Z_j$ to be the point $\lambda$ on the lasso path at which feature $X_j$ first enters the model,$Z_j = sup {\lambda : \tilde{\beta}_j(\lambda) \neq 0}.$ $Z_j$ is small for those null variables.  
+  
+We use the following test statistic is used to determine the significance of each of the n features in the design matrix X:  
+$$ W_j= max (z_j,\tilde{z}_j).sgn(z_j-\tilde{z}_j),$$
+    
+### step 3: Calculate a data-dependent threshold frnthe statistics.
+To assess the performance of the knockoff filtering test, we use the false discovery rate (FDR):  
+$$\underbrace {FDR}_{\text{False Discovery Rate}}=\underbrace {E}_{Expectation}(\underbrace{\frac{\text{number of false positives}}{\text{total number of selected features}}}_{\text{False Discovery Proportion}})$$  
+Letting q stands for the target FDR.  
+There has one theorem makes sure that this method could control a quantity nearly equal to the FDR.  
+*Therorem 1*. for any $q \in [0,1]$, the knockoff methods satisfies
+$$E [\frac{\text{the number of} {j : \beta_j = 0 \text{and}  j \in \tilde{S}}}{\text{the number of }{j : j \in \tilde{S}}+ q^(-1) }] \le q$$
+where the expectation is taken over the Gaussian noise z in the model,while treating X and $\tilde {X}$ are fixed.  
+    
+
+    
+*Therorem 2*. for any $q \in [0,1]$, the knockoff+ methods satisfies
+$$FDR= E [ \frac {\text{the number of } {j : \beta_j = 0 \texst{and} j \in \tilde{S}}{\text{the number of }{j : j \in \tilde{S} \lor 1}} ] \le q  $$
+where the expectation is taken over the Gaussian noise z in the model,while treating X and $\tilde {X}$ are fixed.  
+    
+        
+Thus, our algorithm involves the following steps:  
+1.  Augment the design matrix by introducing het fake knockoff features  
+2.  Fit in the regularized linear model and obtain the estimates    
+$[\beta_1,\beta_2,\ldots,\beta_n,\tilde{\beta}_1,\tilde{\beta}_2,\ldots,\tilde{\beta}_n ]$ via LASSO  
+3.  For each of the 2n features, $[x_1,x_2,\ldots,x_n,\tilde{x}_1,\tilde{x}_2,\ldots,\tilde{x}_n ]$, compute the statistical significance of their corresponding effect sizes (obtained in step 2) using parametric or non-parametric test for $H_o: \beta=0$ vs.$H_a: \beta \neq 0$  
+4.	Use the $[\tilde{\beta}_1,\tilde{\beta}_2,\ldots,\tilde{\beta}_n]$, as proxies of the knockoff features $[\tilde{x}_1,\tilde{x}_2,\ldots,\tilde{x}_n]$, to identify real vs. stochastic effects (the knockoff features serve as control variables (null effects), relative to the default $\alpha =0.05$  
+5.	Report the (real) features $[x_(j_1 ),x_(j_2 ),x_(j_3 ),\ldots,x_(j_m ) ]$ that represent pairs of significant $x_j$ and insignificant features, according to the $W_j$ statistics  
+6.	This protocol guarantees that the expected false discovery rate for the reported features (step 5) would be within the predefined false positive rate $\alpha=0.05$    
+[see @lisher for details]
+
+
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
