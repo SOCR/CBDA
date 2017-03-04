@@ -1,0 +1,3 @@
+load("/Users/zhao_fengyu/CBDA/Pipeline/DISTRIBUTED/BINOMIALdataset/TEST/xy.RData")
+load("/Users/zhao_fengyu/CBDA/Pipeline/DISTRIBUTED/BINOMIALdataset/TEST/CBDA_SL_M10_miss0_n60_80_k15_30_Light_Binomial_dataset_5_new.RData")
+load("/Users/zhao_fengyu/CBDA/Pipeline/DISTRIBUTED/BINOMIALdataset/TEST/CBDA_SL_M10_miss0_n60_80_k15_30_Light_3_Binomial_dataset_5_new.RData")
