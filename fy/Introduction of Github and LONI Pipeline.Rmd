@@ -1,0 +1,158 @@
+---
+title: "Introuduction of Github and Loni PipeLine"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r,echo=F}
+setwd("~/Desktop/fengyu/picture")
+```
+
+
+## Learn about Version Control with Git
+
+Git is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency.
+
+Git is a distributed version control system. In distributed systems, each developer has their own full-fledged repository on their computer. In most set-ups there’s an additional central repository on a server that is used for sharing. However, this is not a requirement; every developer can perform all important actions in their local repository: committing changes, viewing differences between revisions, switching branches, etc.
+
+In Git, a file in your working directory can be in one of several states. The most basic distinction is between tracked and untracked. A file is tracked if it is already under version control; in this case, Git observes all changes in that file. If it is not saved in your Git repository, then it is treated as untracked.
+
+Tracked files can be in one of the following three states:
+
+*Unmodified or committed*
+
+The file is in its last committed state and therefore has no local modifications.
+
+*Modified*
+
+The file has been changed since it was last committed.
+
+*Staged*
+
+The file was not only changed but also added to the staging area, meaning that the changes will be included in the next commit. Because a file can be staged partially, it’s entirely possible for it to be both staged and modified.
+
+There are some tutorials link:
+
+https://www.smashingmagazine.com/2011/07/modern-version-control-with-git-series/
+
+https://guides.github.com/
+
+## Use Version Control with Github Desktop
+
+Before you authenticate to Github, you have to sign up for a new GitHub account.
+
+After applying an account, you could load CBDA files in your own laptop.
+
+
+**1st step : Download Github desktop**
+
+Visit the GitHub Desktop download page:
+
+https://desktop.github.com
+
+**2nd step : Clone CBDA in your own laptop**
+
+1. Open the Github Desktop, in the upper-left corner of your screen, select the GitHub Desktop menu.
+
+
+2. Choose Preferences.
+
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("~/Desktop/fengyu/picture/desktop_preference.png")
+ grid.raster(img)
+```
+
+
+3. In the Preferences window, select Accounts.
+```{r fig.height=5,fig.width=5,echo=FALSE}
+img <- readPNG("~/Desktop/fengyu/picture/account.png")
+ grid.raster(img)
+```
+
+4. In the Accounts pane, type your GitHub.com credentials and click Sign In.
+
+5. Open the link:
+
+https://github.com/SOCR/CBDA
+
+Click the gree button *Clone or download*, then click *Open in Desktop*.
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("~/Desktop/fengyu/picture/githubdesktop.png")
+ grid.raster(img)
+```
+
+6. In GitHub Desktop, after verifying the name and location on your hard drive where you'd like to clone the repository, click Clone
+
+Then you have cloned the CBDA file in your own laptop.
+
+**3rd step : Sync and make commits**
+
+*About Sync*
+
+If a team member has changed some files or add something new to the project, and you want to keep updated with the remote server.  In the upper-right corner of the Desktop, click  **Sync**.
+
+As you make changes to your project locally, you can keep them up-to-date with your remote repository. In this project, a *remote* is the CBDA server.
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+img <- readPNG("~/Desktop/fengyu/picture/sync.png")
+ grid.raster(img)
+```
+
+*About Commits*
+
+When you want to create something or do some changes to the files in your project, you could push it to your project by creating *commits*, which briefly describes the changes.
+
+As commits are pushed to your project on GitHub, you can keep your local copy of the project in sync with the remote repository.
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+img <- readPNG("~/Desktop/fengyu/picture/commit.png")
+ grid.raster(img)
+```
+
+This is a tutorial about Contributing to Projects with Github Desktop:
+
+https://help.github.com/desktop/guides/contributing/
+
+
+## Learn about the LONI Pipeline
+
+**1st step : Download the LONI Pipeline**
+
+Visit the Pipeline download page:
+
+http://pipeline.loni.usc.edu/products-services/pipeline-software/
+
+
+
+**2nd step : Apply to a LONI Pipeline guest account**
+
+Open the link: http://pipeline.loni.usc.edu/products-services/pws/.
+
+Then click *Click here to launch the Pipeline Web Start* to download the JNLP file.
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+img <- readPNG("~/Desktop/fengyu/picture/Pipeloni.png")
+ grid.raster(img)
+```
+
+After download the Pipeline JNLP file, right click it and choose open with Java Web Start. 
+```{r fig.height=5,fig.width=5,echo=FALSE}
+img <- readPNG("~/Desktop/fengyu/picture/pipe_java.png")
+ grid.raster(img)
+```
+
+When the LONI pipeline is running, at the bottom right there is an icon and it says Not Connected. Click the button and select *Try it now*, then the button change green and it would say Connection.
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("~/Desktop/fengyu/picture/pipe_account.png")
+ grid.raster(img)
+```
