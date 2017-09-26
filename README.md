@@ -23,6 +23,8 @@ interactive services for data interrogation, including high-dimensional data vis
 and education. Specific applications include neuroimaging-genetics studies of Alzheimer’s disease, predictive modeling of 
 cancer treatment outcomes, and high-throughput data analytics using graphical pipeline workflows.
 
+The source code to run the CBDA protocol is at [source1.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.zip) or at [source2.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.tar.gz).
+
 ## References
 * [PMID:26998309](https://www.ncbi.nlm.nih.gov/pubmed/26998309)
 * [PMID:26918190](https://www.ncbi.nlm.nih.gov/pubmed/26918190)
