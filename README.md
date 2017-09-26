@@ -23,6 +23,12 @@ interactive services for data interrogation, including high-dimensional data vis
 and education. Specific applications include neuroimaging-genetics studies of Alzheimer’s disease, predictive modeling of 
 cancer treatment outcomes, and high-throughput data analytics using graphical pipeline workflows.
 
+A pre-release of the CBDA protocol is available [here](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha). A manuscript entitled "Controlled Feature Selection and Compressive Big Data Analytics: Applications to Big Biomedical and Health Studies" is currently under review.
+
+The CBDA protocol has been developed in the [R environment](https://www.r-project.org). Since a large number of smaller training sets are needed for the convergence of the protocol, we created a workflow that runs on the [LONI pipeline environment](http://pipeline.loni.usc.edu), a free platform for high performance computing that allows the simultaneous submission of hundreds of independent instances/jobs of the CBDA protocol. The methods, software and protocols developed here are openly shared on our [GitHub repository](https://github.com/SOCR/CBDA). All software, workflows, and datasets are publicly accessible. The CBDA protocol steps are illustrated in **Figure 1**. 
+![figure1](https://user-images.githubusercontent.com/18661302/30587406-0c2edf2c-9d01-11e7-8cef-45f3595ade65.png).
+See the [CBDA pre-release](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha) for details.
+
 The source code to run the CBDA protocol is at [source1.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.zip) or at [source2.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.tar.gz).
 
 ## References
