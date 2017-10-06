@@ -72,6 +72,8 @@ names(Xtemp) <- 1:dim(Xtemp)[2]
 ## SAMPLE THE PREDICTION DATASET -- THIS STEP IS DATA INDEPENDENT
 ## This ensures reproducibility of the analysis
 set.seed(12345)
+set.seed(55555555)
+
 ## The fraction alpha of data/patients to use for prediction could be passed as an input argument as well
 ## Below the sampling is balanced
 ## Eliminating q subjects for prediction, in a BALANCED WAY
@@ -111,7 +113,8 @@ print(qa_ALL[1:BEST,], right = FALSE, row.names = FALSE)
 # This step defines and samples the subsets of features for training based on the Kcol sample
 #Kcol <- round(dim(Xtemp)[2]*(runif(1,Kcol_min/100,Kcol_max/100))) # sample a value from a uniform distribution within Kcol_min and Kcol_max [number of features/columns of the big dataset]
 #k <- sample(1:dim(Xtemp)[2],Kcol)
-max_k <- min(dim(Xtemp)[2],j_global+5)
+#max_k <- min(dim(Xtemp)[2],j_global+5)
+max_k <- min(dim(Xtemp)[2],j_global+2)
 k_Acc <- as.numeric(paste(qa_ALL$Accuracy[1:(max_k)]))
 k_MSE <- as.numeric(paste(qa_ALL$MSE[1:(max_k)]))
 
