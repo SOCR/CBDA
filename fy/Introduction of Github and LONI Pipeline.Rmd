@@ -1,8 +1,8 @@
 ---
 title: "Introuduction of Github and Loni PipeLine"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r,echo=F}
@@ -156,3 +156,53 @@ library(grid)
 img <- readPNG("~/Desktop/fengyu/picture/pipe_account.png")
  grid.raster(img)
 ```
+
+The CBDA workflow could be run in the LONI Pipeline, the picture of the workflow is:
+
+```{r fig.height=10,fig.width=10,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("~/Desktop/fengyu/picture/workflow.png")
+ grid.raster(img)
+```
+
+You could use the link to download the pipe file:
+
+https://github.com/SOCR/CBDA/blob/master/LATEST%20RELEASE%20September%202017/CBDA_KO_Master_balanced_complete_INFERENCE.pipe
+
+The file used in the pipe file could be found here:
+
+https://github.com/SOCR/CBDA/tree/master/LATEST%20RELEASE%20September%202017
+
+Before running the workflow, check the validation first:
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("~/Desktop/fengyu/picture/validation.png")
+ grid.raster(img)
+```
+
+If all of the validations are passed, click the gree button at the bottom to run it.
+
+```{r fig.height=5,fig.width=5,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("~/Desktop/fengyu/picture/run_file.png")
+ grid.raster(img)
+```
+
+After running all of the workflow, the file is stored in the /ifshome/pipelnvt, which is set as the default home directory of the output file.
+
+To copy the file to your own pipeline directory, use the pipe file:
+
+https://github.com/fengyuz/CBDA/blob/master/fy/CBDA_copy.pipe
+
+using dir.create("~/own_directory/") to creat your own directory in the /ifshome/pipelnvt/own_directory/,
+then using the file.copy() to copy the file from /ifshome/pipelnvt to /ifshome/pipelnvt/own_directory/
+
+The R file could be found here:
+
+https://github.com/fengyuz/CBDA/blob/master/fy/COPY_files_on_CRANIUM_NEW.R
+
+Then the output file could be found in /ifshome/pipelnvt/own_directory/
