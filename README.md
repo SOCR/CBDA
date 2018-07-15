@@ -2,7 +2,7 @@
 
 ## Compressive Big Data Analytics (CBDA)  
 
-The theoretical foundations of Big Data Science are not fully developed, yet. 
+The theoretical foundations of Big Data Science are not fully developed, yet.   
 The CBDA project investigates a new Big Data theory for high-throughput analytics and model-free Inference. 
 Specifically, we explore the core principles of distribution-free and model-agnostic methods for scientific inference 
 based on Big Data sets. Compressive Big Data analytics (CBDA) represents an idea that iteratively generates random (sub)samples
