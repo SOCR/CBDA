@@ -1,0 +1,148 @@
+
+R version 3.4.3 (2017-11-30) -- "Kite-Eating Tree"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # Attach the CBDA library
+> suppressPackageStartupMessages(library(CBDA))
+> suppressPackageStartupMessages(library(randomForest ))
+> suppressPackageStartupMessages(library(glmnet ))
+> suppressPackageStartupMessages(library(SuperLearner))
+> suppressPackageStartupMessages(library(bartMachine))
+> 
+> library(CBDA, quietly = TRUE, verbose = FALSE)
+> CBDA_initialization()
+package missForest already installed
+package stats already installed
+package utils already installed
+package prettydoc already installed
+package foreach already installed
+package SuperLearner already installed
+package knockoff already installed
+package caret already installed
+package smotefamily already installed
+package parallel already installed
+package doParallel already installed
+package glmnet already installed
+Loading required package: prettydoc
+Loading required package: knockoff
+Loading required package: caret
+Loading required package: lattice
+Loading required package: ggplot2
+
+Attaching package: 'ggplot2'
+
+The following object is masked from 'package:randomForest':
+
+    margin
+
+Loading required package: smotefamily
+Loading required package: parallel
+Loading required package: doParallel
+  missForest        stats        utils    prettydoc      foreach SuperLearner 
+        TRUE         TRUE         TRUE         TRUE         TRUE         TRUE 
+    knockoff        caret  smotefamily     parallel   doParallel       glmnet 
+        TRUE         TRUE         TRUE         TRUE         TRUE         TRUE 
+> 
+> # Set the specs for the synthetic dataset to be tested
+> n = 300          # number of observations
+> p = 100          # number of variables
+> 
+> # Generate a nxp matrix of IID variables (e.g., ~N(0,1))
+> X1 = matrix(rnorm(n*p), nrow=n, ncol=p)
+> 
+> # Setting the nonzero variables - signal variables
+> #nonzero=c(1,100,200,300,400,500,600,700,800,900)
+> nonzero=c(10,20,30,40,50,60,70,80,90,100)
+> 
+> # Set the signal amplitude (for noise level = 1)
+> amplitude = 10
+> 
+> # Allocate the nonzero coefficients in the correct places
+> beta = amplitude * (1:p %in% nonzero)
+> 
+> # Generate a linear model with a bias (e.g., white  noise ~N(0,1))
+> ztemp <- function() X1 %*% beta + rnorm(n)
+> z = ztemp()
+> 
+> # Pass it through an inv-logit function to
+> # generate the Bernoulli response variable Ytemp
+> pr = 1/(1+exp(-z))
+> Ytemp = rbinom(n,1,pr)
+> X2 <- cbind(Ytemp,X1)
+> 
+> dataset_file ="Binomial_dataset.txt"
+> 
+> # Save the synthetic dataset
+> a <- tempdir()
+> write.table(X2, file = file.path(a, dataset_file), sep=",")
+> 
+> # Load the Synthetic dataset
+> #Data = read.csv(paste0(file.path(a),'/',dataset_file),header = TRUE)
+> Data = read.csv(file.path(a, dataset_file),header = TRUE)
+> Ytemp <- Data[,1] # set the outcome
+> original_names_Data <- names(Data)
+> cols_to_eliminate=1
+> Xtemp <- Data[-cols_to_eliminate] # set the matrix X of features/covariates
+> original_names_Xtemp <- names(Xtemp)
+> 
+> # Add more wrappers/algorithms to the SuperLearner ensemble predictor
+> # It can be commented out if only the default set of algorithms are used,
+> # e.g., algorithm_list = c("SL.glm","SL.xgboost","SL.glmnet","SL.svm",
+> #                          "SL.randomForest","SL.bartMachine")
+> # This defines a "new" wrapper, based on the default SL.glmnet
+>  SL.glmnet.0.75 <- function(..., alpha = 0.75,family="binomial"){
++                   SL.glmnet(..., alpha = alpha, family = family)}
+> 
+> # Using Support Vector Machine and the new Glmnet wrapper above
+>  #test_example <- c("SL.glmnet","SL.glmnet.0.75")
+>  test_example <- c("SL.glmnet","SL.svm","SL.randomForest","SL.bartMachine")
+> 
+>  ## SINGLE CORE EXAMPLE - TRAINING/LEARNING ONLY
+> CBDA_singlecore_training <- CBDA.training(Ytemp , Xtemp , M = 8 ,
++                                 Nrow_min = 60, Nrow_max = 80,
++                          top = 6, max_covs = 6 , min_covs = 3,
++                          algorithm_list = test_example , label = "SINGLE_CORE" ,
++                          workspace_directory = a)
+Subsampling size =  8 
+
+Case Sampling Range - CSR (%) =  60_80 %
+
+Feature Sampling Range - FSR (%) =  5_15 %
+
+Learning/Training steps initiated successfully !!
+Loading required package: e1071
+Completion %
+12.5
+Completion %
+25
+Completion %
+37.5
+Completion %
+50
+Completion %
+62.5
+Completion %
+75
+Completion %
+87.5
+Completion %
+100
+Learning/Training steps completed successfully !!
+
+> 
+> proc.time()
+   user  system elapsed 
+ 135.09    1.27  130.57 
