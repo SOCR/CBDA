@@ -33,6 +33,8 @@ The source code to run the CBDA protocol is at [source1.zip](https://github.com/
 The CBDA protocol steps are illustrated in **Figure 1**. 
 ![figure1](https://user-images.githubusercontent.com/18661302/30587406-0c2edf2c-9d01-11e7-8cef-45f3595ade65.png).
 
+## Acknowledgments
+This work is supported in part by NIH grants [U54 EB020406](http://bd2k.loni.usc.edu/), [P20 NR015331](www.socr.umich.edu/CSCD), [P50 NS091856](http://udallpd.umich.edu/), [P30 DK089503](http://mmoc.med.umich.edu/), [P30AG053760](https://alzheimers.med.umich.edu), [UL1TR002240](https://www.michr.umich.edu), and NSF grants [1734853](http://brain-life.org/), [1636840](http://neurosciencenetwork.org/), [1416953](http://distributome.org), [0716055](http://socr.umich.edu) and [1023115](http://distributome.org). Students, trainees, scholars, and researchers from SOCR, BDDS, MNORC, MIDAS, MADC, MICHR, and the broad R-statistical computing community have contributed ideas, code, and support.
 
 ## References
 * [PMID:26998309](https://www.ncbi.nlm.nih.gov/pubmed/26998309)
