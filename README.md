@@ -28,7 +28,7 @@ A manuscript entitled ["Controlled Feature Selection and Compressive Big Data An
 
 The CBDA protocol has been developed in the [R environment](https://www.r-project.org), see the [CBDA R package download site on C-RAN](https://cran.r-project.org/package=CBDA) for the latest R version (currently R-3.5.1). Since a large number of smaller training sets are needed for the convergence of the protocol, we created a workflow that runs on the [LONI pipeline environment](http://pipeline.loni.usc.edu), a free platform for high performance computing that allows the simultaneous submission of hundreds of independent instances/jobs of the CBDA protocol. The methods, software, workflows, datssets and protocols developed here are publicly accessible and openly shared in our [first CBDA release](https://github.com/SOCR/CBDA/releases). 
 
-The source code to run the CBDA protocol is at [source1.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.zip) or at [source2.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.tar.gz). See the [CBDA pre-release](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha) for details.
+The source code to run the CBDA protocol is at [source1.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.zip) or at [source2.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.tar.gz).
 
 The CBDA protocol steps are illustrated in **Figure 1**. 
 
