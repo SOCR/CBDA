@@ -26,11 +26,34 @@ cancer treatment outcomes, and high-throughput data analytics using graphical pi
 
 A manuscript entitled ["Controlled Feature Selection and Compressive Big Data Analytics: Applications to Big Biomedical and Health Studies"](https://www.ncbi.nlm.nih.gov/pubmed/30161148) has been published on PLOS ONE Bioinformatics.
 
-The CBDA protocol has been developed in the [R environment](https://www.r-project.org), see the [CBDA R package download site on C-RAN](https://cran.r-project.org/package=CBDA). Since a large number of smaller training sets are needed for the convergence of the protocol, we created a workflow that runs on the [LONI pipeline environment](http://pipeline.loni.usc.edu), a free platform for high performance computing that allows the simultaneous submission of hundreds of independent instances/jobs of the CBDA protocol. The methods, software and protocols developed here are openly shared on our [GitHub repository](https://github.com/SOCR/CBDA). All software, workflows, and datasets are publicly accessible. A pre-release of the CBDA protocol is als available [here](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha). 
+The CBDA protocol has been developed in the [R environment](https://www.r-project.org), see the [CBDA R package download site on C-RAN](https://cran.r-project.org/package=CBDA) for the latest R version (currently R-3.5.1). Since a large number of smaller training sets are needed for the convergence of the protocol, we created a workflow that runs on the [LONI pipeline environment](http://pipeline.loni.usc.edu), a free platform for high performance computing that allows the simultaneous submission of hundreds of independent instances/jobs of the CBDA protocol. The methods, software and protocols developed here are openly shared on our [GitHub repository](https://github.com/SOCR/CBDA). All software, workflows, and datasets are publicly accessible. A pre-release of the CBDA protocol is als available [here](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha). 
 
 The source code to run the CBDA protocol is at [source1.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.zip) or at [source2.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.tar.gz). See the [CBDA pre-release](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha) for details.
 
 The CBDA protocol steps are illustrated in **Figure 1**. 
+
+## CBDA R Package Installation
+The version 1.0.0 of the CBDA package can be downloaded and installed with the following command:
+```{r Installation of the CBDA package from CRAN, eval = FALSE}
+install.packages("CBDA",repos = 'https://cran.r-project.org/')
+```
+
+The documentation and vignettes, as well as the source and binary files can be found on  [CRAN](https://cran.r-project.org/web/packages/CBDA/index.html). 
+The [binary](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.zip) and the  [source](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.tar.gz) files for the CBDA R package can also be downloaded from our [Github repository](https://github.com/SOCR/CBDA/releases/tag/1.0.0) and install it via the following commands.
+
+```{r Installation of the CBDA package, eval = FALSE}
+# Installation from the Windows binary (recommended for Windows systems)
+install.packages("/filepath/CBDA_1.0.0.zip", repos = NULL, type = "win.binary") 
+# Installation from the source (recommended for Macs and Linux systems)
+install.packages("/filepath/CBDA_1.0.0.tar.gz", repos = NULL, type = "source")
+```
+
+
+The necessary packages to run the CBDA algortihm are installed automatically at installation. However, they can also be installed/attached by launching the *CBDA_initialization()* function (see example in the R chunk below).  If the parameter *install* is set to *TRUE* (by default it's set to FALSE), then the *CBDA_initialization()* function installs (if needed) and attaches all the necessary packages to run the CBDA package v1.0.0. This function can be run before any production run or test. The list of packages can pe personalized to comprise extra packages needed for an expanded SL.library or for other needs by the user. The output shows a table (see Figure below) where for each package a TRUE or FALSE is displayed. Thus the necessary steps can be pursued in case some package has a FALSE. 
+
+**N.B.: to eliminate a warning in Windows due to the "doMC" package not available (it was intended for Mac), install the "doMC" with the following command "install.packages("doMC", repos="http://R-Forge.R-project.org")"**
+
+![ipaktable](https://user-images.githubusercontent.com/18661302/36685272-d55b23c0-1af0-11e8-9479-528ef2dfacf6.JPG){width=90%}
 ![figure1](https://user-images.githubusercontent.com/18661302/30587406-0c2edf2c-9d01-11e7-8cef-45f3595ade65.png).
 
 ## Acknowledgments
