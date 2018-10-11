@@ -26,7 +26,7 @@ cancer treatment outcomes, and high-throughput data analytics using graphical pi
 
 A manuscript entitled ["Controlled Feature Selection and Compressive Big Data Analytics: Applications to Big Biomedical and Health Studies"](https://www.ncbi.nlm.nih.gov/pubmed/30161148) has been published on PLOS ONE Bioinformatics.
 
-The CBDA protocol has been developed in the [R environment](https://www.r-project.org), see the [CBDA R package download site on C-RAN](https://cran.r-project.org/package=CBDA) for the latest R version (currently R-3.5.1). Since a large number of smaller training sets are needed for the convergence of the protocol, we created a workflow that runs on the [LONI pipeline environment](http://pipeline.loni.usc.edu), a free platform for high performance computing that allows the simultaneous submission of hundreds of independent instances/jobs of the CBDA protocol. The methods, software and protocols developed here are openly shared on our [GitHub repository](https://github.com/SOCR/CBDA). All software, workflows, and datasets are publicly accessible. A pre-release of the CBDA protocol is als available [here](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha). 
+The CBDA protocol has been developed in the [R environment](https://www.r-project.org), see the [CBDA R package download site on C-RAN](https://cran.r-project.org/package=CBDA) for the latest R version (currently R-3.5.1). Since a large number of smaller training sets are needed for the convergence of the protocol, we created a workflow that runs on the [LONI pipeline environment](http://pipeline.loni.usc.edu), a free platform for high performance computing that allows the simultaneous submission of hundreds of independent instances/jobs of the CBDA protocol. The methods, software and protocols developed here are openly shared on our [GitHub repository](https://github.com/SOCR/CBDA). All software, workflows, and datasets are publicly accessible. A pre-release of the CBDA protocol is als available [here](https://github.com/SOCR/CBDA/releases). 
 
 The source code to run the CBDA protocol is at [source1.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.zip) or at [source2.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.tar.gz). See the [CBDA pre-release](https://github.com/SOCR/CBDA/releases/tag/v0.1-alpha) for details.
 
@@ -39,7 +39,7 @@ install.packages("CBDA",repos = 'https://cran.r-project.org/')
 ```
 
 The documentation and vignettes, as well as the source and binary files can be found on  [CRAN](https://cran.r-project.org/web/packages/CBDA/index.html). 
-The [binary](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.zip) and the  [source](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.tar.gz) files for the CBDA R package can also be downloaded from our [Github repository](https://github.com/SOCR/CBDA/releases/tag/1.0.0) and install it via the following commands.
+The [binary](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.zip) and the  [source](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.tar.gz) files for the CBDA R package can also be downloaded from our [Github repository](https://github.com/SOCR/CBDA/releases) and install it via the following commands.
 
 ```{r Installation of the CBDA package, eval = FALSE}
 # Installation from the Windows binary (recommended for Windows systems)
