@@ -32,11 +32,18 @@ The source code to run the CBDA protocol is at [source1.zip](https://github.com/
 
 The CBDA protocol steps are illustrated in **Figure 1**. 
 
+
 ## CBDA R Package Installation
 The version 1.0.0 of the CBDA package can be downloaded and installed with the following command:
 ```{r Installation of the CBDA package from CRAN, eval = FALSE}
 install.packages("CBDA",repos = 'https://cran.r-project.org/')
 ```
+
+The historical CBDA stats (since publication in April 16 2018 on CRAN) are shown in the Figure below .
+![figure0](https://github.com/SOCR/CBDA/blob/master/Images/CBDA_CRAN_stats.jpeg)
+
+A comparison with some other similar packages for the month of November 2018 is shown below. ![figure0](https://github.com/SOCR/CBDA/blob/master/Images/CBDA_stats_comparison_Nov2018.jpeg)
+
 
 The documentation and vignettes, as well as the source and binary files can be found on  [CRAN](https://cran.r-project.org/web/packages/CBDA/index.html). 
 The [binary](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.zip) and the  [source](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.tar.gz) files for the CBDA R package can also be downloaded from our [Github repository](https://github.com/SOCR/CBDA/releases) and install it via the following commands.
