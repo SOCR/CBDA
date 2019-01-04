@@ -70,3 +70,4 @@ This work is supported in part by NIH grants [U54 EB020406](http://bd2k.loni.usc
 * [PMID:26998309](https://www.ncbi.nlm.nih.gov/pubmed/26998309)
 * [PMID:26918190](https://www.ncbi.nlm.nih.gov/pubmed/26918190)
 * [CBDA R package](https://cran.r-project.org/package=CBDA)
+* [CBDA Website](http://socr.umich.edu/HTML5/CBDA/).
