@@ -60,7 +60,7 @@ The necessary packages to run the CBDA algortihm are installed automatically at 
 
 **N.B.: to eliminate a warning in Windows due to the "doMC" package not available (it was intended for Mac), install the "doMC" with the following command "install.packages("doMC", repos="http://R-Forge.R-project.org")"**
 
-![ipaktable](https://user-images.githubusercontent.com/18661302/36685272-d55b23c0-1af0-11e8-9479-528ef2dfacf6.JPG){width=90%}
+![ipaktable](https://user-images.githubusercontent.com/18661302/36685272-d55b23c0-1af0-11e8-9479-528ef2dfacf6.JPG){ width=90% }
 ![figure1](https://user-images.githubusercontent.com/18661302/30587406-0c2edf2c-9d01-11e7-8cef-45f3595ade65.png).
 
 ## Acknowledgments
