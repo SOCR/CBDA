@@ -24,11 +24,9 @@ CBDA_Consolidation.pipeline_LG <- function(M = 9000, top = 1000, max_covs = 50 ,
 #    filename <- file.path(workspace_directory,
 #                          paste0("CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,
 #                                 "_k",range_k,"_Light_",j,"_",label,".RData"))
-    workspace_directory <- "/ifs/loni/ccb/collabs/2016/CBDA_SL_2016/2018/Simeone/Binomial_10k_1k"
     filename <- file.path(workspace_directory,
                           paste0("CBDA_M",M,"_miss",misValperc,"_",j,"_",label,".RData"))
     eval(parse(text=paste0("featureSet <- c('k",j,".txt')")))
-    workspace_directory <- "/ifs/loni/ccb/collabs/2016/CBDA_SL_2016/2018/Simeone/Binomial_10k_1k"
     featureSet_specs <- file.path(workspace_directory,featureSet)
     k=as.numeric(unlist(read.table(featureSet_specs,sep=",",header = FALSE,col.names = FALSE)))
     rownames(k)<-colnames(k)<-NULL
