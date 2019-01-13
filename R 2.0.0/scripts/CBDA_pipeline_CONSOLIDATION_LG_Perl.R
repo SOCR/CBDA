@@ -175,7 +175,8 @@ filename_qa_ALL <- file.path(workspace_directory,paste0(label,"_qa_ALL.RData"))
     print(qa_ALL[1:max_covs,], right = FALSE, row.names = FALSE)
   }
   CBDA_object_Training <- NULL
-  CBDA_object_Training[[1]] <- qa_ALL
+#  qa_ALL$MSE <- as.numeric(as.character(qa_ALL$MSE[1:dim(qa_ALL)[1]]))-1
+#  qa_ALL$Accuracy <- as.numeric(as.character(qa_ALL$Accuracy[1:dim(qa_ALL)[1]]))-1
   CBDA_object_Training[[2]] <- m_training
   CBDA_object_Training[[3]] <- algorithm_list
 
@@ -265,18 +266,18 @@ print(jobID_temp)
 print(M)
 failedJobs <- which(seq(1,as.numeric(M),1) %in% as.numeric(jobID_temp)==FALSE)
 #print(failedJobs)
-filename_failedJobs <- file.path(workspace_directory,'failedJobs.txt')
+filename_failedJobs <- file.path(workspace_directory,'/Results/failedJobs.txt')
 #print(filename_failedJobs)
 ## This checks if it is the 2nd time (at least) that the training has been restarted
 ## with an existing failedJobs.txt file in the directory. If that is the case,
 ## the existing file failedJobs.txt is deleted and recreated, if there's any failed job
-if (length(list.files(path=workspace_directory,pattern="failedJobs.txt")>0))
+if (length(list.files(path=workspace_directory,pattern="/Results/failedJobs.txt")>0))
     {
      cat("Removing the existing file: failedJobs.txt \n\n")
      file.remove(filename_failedJobs) 
 }
 ## This should be empty
-list.files(path=workspace_directory,pattern="failedJobs.txt")
+list.files(path=workspace_directory,pattern="/Results/failedJobs.txt")
 
 if (length(failedJobs)>0)
     { 

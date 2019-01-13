@@ -54,18 +54,18 @@ validation_seq=seq(min_covs,max_covs,1)
 failedJobs_locations <- which(validation_seq %in% as.numeric(jobID_temp_validation)==FALSE)
 failedJobs_validation <- validation_seq[failedJobs_locations]
 print(failedJobs_validation)
-filename_failedJobs <- file.path(workspace_directory,'failedJobs_VALIDATION.txt')
+filename_failedJobs <- file.path(workspace_directory,'/Results/failedJobs_VALIDATION.txt')
 #print(filename_failedJobs)
 ## This checks if it is the 2nd time (at least) that the training has been restarted
 ## with an existing failedJobs_VALIDATION.txt file in the directory. If that is the case,
 ## the existing file failedJobs.txt is deleted and recreated, if there's any failed job
-if (length(list.files(path=workspace_directory,pattern="failedJobs_VALIDATION.txt")>0))
+if (length(list.files(path=workspace_directory,pattern="/Results/failedJobs_VALIDATION.txt")>0))
 {
   cat("Removing the existing file: failedJobs_VALIDATION.txt \n\n")
   file.remove(filename_failedJobs) 
 }
 ## This should be empty
-list.files(path=workspace_directory,pattern="failedJobs_VALIDATION.txt")
+list.files(path=workspace_directory,pattern="/Results/failedJobs_VALIDATION.txt")
 
 if (length(failedJobs_validation)>0)
 { 

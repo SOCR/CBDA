@@ -212,7 +212,8 @@ test_example <- c("SL.glm","SL.bayesglm","SL.earth","SL.glm.interaction","SL.ipr
                   "SL.xgboost","SL.xgboost.500","SL.xgboost.300","SL.xgboost.2000",
                   "SL.xgboost.1500","SL.xgboost.d3","SL.xgboost.d5", "SL.xgboost.d6",
                   "SL.xgboost.gau","SL.xgboost.shrink.15","SL.xgboost.shrink.2",
-                  "SL.xgboost.shrink.05","SL.xgboost.shrink.25")
+                  "SL.xgboost.shrink.05","SL.xgboost.shrink.25",
+                  "SL.knn","SL.knn.100","SL.knn.50","SL.knn.25","SL.knn.5")
 algorithm_list_not_working = c("SL.biglasso","SL.extraTrees","SL.kernelKnn","SL.ksvm",
                                "SL.lda","SL.lm","SL.qda","SL.speedglm","SL.speedlm")
 # Removed because of the following error message:
@@ -237,11 +238,11 @@ CBDA.pipeline.Validation.Perl.LG <- function(job_id , label = "CBDA_package_test
   }
   
   # I might need to add the "/" before label (paste0("/",label,"_info.RData"))
-  filename_specs_1 <- file.path(workspace_directory,paste0(label,"_info.RData"))
-  M=as.numeric(M)
-  print(filename_specs_1)
-  save(label,workspace_directory,M,misValperc,top,min_covs,max_covs,
-       file = filename_specs_1)
+  # filename_specs_1 <- file.path(workspace_directory,paste0(label,"_info.RData"))
+  # M=as.numeric(M)
+  # print(filename_specs_1)
+  # save(label,workspace_directory,M,misValperc,top,min_covs,max_covs,
+  #      file = filename_specs_1)
   eval(parse(text=paste0("trainingSet <- c('X",job_id,"_final.txt')")))
   eval(parse(text=paste0("validationSet <- c('X",job_id,"_validation_final.txt')")))
   eval(parse(text=paste0("featureSet <- c('newk",job_id,".txt')")))
@@ -252,33 +253,50 @@ CBDA.pipeline.Validation.Perl.LG <- function(job_id , label = "CBDA_package_test
   print(trainingSet_specs)
   print(validationSet_specs)
   print(featureSet)
+  print(featureSet_specs)
   
 X=read.table(trainingSet_specs,sep=",",header = FALSE)
 rownames(X)<-colnames(X)<-NULL
 Xv=read.table(validationSet_specs,sep=",",header = FALSE)
 rownames(Xv)<-colnames(Xv)<-NULL
-dim(X)
-dim(Xv)
+print(dim(X))
+print(dim(Xv))
 
-k=as.numeric(unlist(read.table(featureSet_specs,sep=",",header = FALSE,col.names = FALSE)))
-rownames(k)<-colnames(k)<-NULL
-eval(parse(text=paste0("k",job_id,"<-k")))
+print(X[1:5,])
+print(Xv[1:5,])
+pilot_data=X
+a=ifelse((is.na(pilot_data)),1,0);
+print(100*sum(a)/(dim(pilot_data)[1]*dim(pilot_data)[2]))
+pilot_data=Xv
+a=ifelse((is.na(pilot_data)),1,0);
+print(100*sum(a)/(dim(pilot_data)[1]*dim(pilot_data)[2]))
 
+# k=as.numeric(unlist(read.table(featureSet_specs,sep=",",header = FALSE,col.names = FALSE)))
+# rownames(k)<-colnames(k)<-NULL
+# eval(parse(text=paste0("k",job_id,"<-k")))
 
 cases_to_delete=NULL
 b=intersect(X[,1],Xv[,1])
-for (i in 1: length(b))
-{
-  a=which(X[,1]==b[i])
-  if (is.null(a)){
-    cat("No cases overlap between training and validation sets\n\n")
-    #Data=X
-  } else {
-    cases_to_delete=cbind(cases_to_delete,a)
+if (length(b)==0){
+  print("No cases overlap between training and validation sets\n\n")
+} else {
+  for (i in 1: length(b))
+  {
+    a=which(X[,1]==b[i])
+    print(a)
+    is.null(a)
+    cases_to_delete=as.numeric(cbind(cases_to_delete,a))
     # Here I delete the cases that overlap with the validation set
     X=X[-cases_to_delete,]
+    print(cases_to_delete)
   }
 }
+dim(X)
+dim(Xv)
+
+
+
+
 
 ## TRAINING SETS
 
@@ -286,18 +304,30 @@ for (i in 1: length(b))
 eval(paste0("n",job_id,"<-X[,1]"))
 # Here I save into Ytemp the output for training
 Ytemp <- X[,2]
+print(Ytemp)
+
 # Here I save into k1 the features selected for training
-eval(parse(text=paste0("featureSet <- c('newk",job_id,".txt')")))
-featureSet_specs <- file.path(workspace_directory,featureSet)
-columnNames <- read.table(featureSet_specs,sep=",",header = FALSE)
-rownames(columnNames)<-colnames(columnNames)<-NULL
-eval(paste0("k",job_id,"<-columnNames"))
+# eval(parse(text=paste0("featureSet <- c('newk",job_id,".txt')")))
+# featureSet_specs <- file.path(workspace_directory,featureSet)
+# columnNames <- read.table(featureSet_specs,sep=",",header = FALSE)
+# rownames(columnNames)<-colnames(columnNames)<-NULL
+# eval(paste0("k",job_id,"<-columnNames"))
+
+k=as.numeric(unlist(read.table(featureSet_specs,sep=",",header = FALSE,col.names = FALSE)))
+rownames(k)<-colnames(k)<-NULL
+eval(parse(text=paste0("k",job_id,"<-k")))
+columnNames <- k
+print(columnNames)
+
+
 # here I define and delete the first 2 columns from both the X training
 # and validation sets (cases IDs and Output columns, respectively
 cols_to_delete = c(1,2)
 Xtemp <- X[-cols_to_delete]
 names(Xtemp) <- columnNames
 
+print(dim(Xtemp))
+print(Xtemp[1:5,])
 ## VALIDATION SETS
 # Here I save into n1 the cases left selected for validation
 casesIDsValidation <- Xv[,1]
@@ -306,6 +336,9 @@ Ypred <- Xv[,2]
 # here I define and delete the first 2 columns from the X validation set (cases IDs and Output columns, respectively
 Xpred <- Xv[-cols_to_delete]
 names(Xpred) <- columnNames
+
+print(length(Ypred))
+print(Ypred[1:5])
 
 
 ## DATA IMPUTATION
@@ -327,6 +360,13 @@ if (isTRUE(length(which(is.na(Xtemp_mis) == "TRUE")) == 0)){
   Xpred_norm <- as.data.frame(scale(Xpred_imp$ximp))
 }
 
+print(dim(Xtemp_norm))
+print(Xtemp_norm[1:5,])
+
+print(dim(Xpred_norm))
+print(Xpred_norm[1:5,])
+
+
 # Automated labeling of sub-matrices, assigned to X
 # X <- as.data.frame(Xtemp_norm)
 # Y <- Ytemp[n]
@@ -344,7 +384,6 @@ Data_balanced <- smotefamily::SMOTE(Data_unbalanced[,-dim(Data_unbalanced)[2]],D
 X <- Data_balanced$data[,-dim(Data_unbalanced)[2]]
 Y <- as.numeric(Data_balanced$data[,dim(Data_unbalanced)[2]])
 
-
 ## KNOCKOFF FILTER
 ## IMPORTANT  --> subjects # >> features # !!!
 ## It creates KO_result_j objects with all the stats, results, FDR proportion,...
@@ -357,6 +396,13 @@ if (dim(X)[2]<dim(X)[1])
   
 }
 algorithm_list=test_example
+print(dim(X))
+print(length(Y))
+print(dim(Xpred_norm))
+print(X[1:5,])
+print(Y[1:5])
+print(Xpred_norm[1:5,])
+
 SL <- try(SuperLearner::SuperLearner(Y , X , newX = Xpred_norm,
                                      family=stats::binomial(),
                                      SL.library=algorithm_list,
@@ -455,7 +501,7 @@ w0=list.files(path=workspace_directory,pattern="only")
 w1=list.files(path=workspace_directory,pattern="^X")
 w2=list.files(path=workspace_directory,pattern="^k")
 file.remove(path=workspace_directory,w0)
-file.remove(path=workspace_directory,w1)
+#file.remove(path=workspace_directory,w1)
 file.remove(path=workspace_directory,w2)
 cat("Unnecessary files removed\n\n")
 

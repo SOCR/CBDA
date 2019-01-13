@@ -212,7 +212,8 @@ test_example <- c("SL.glm","SL.bayesglm","SL.earth","SL.glm.interaction","SL.ipr
                   "SL.xgboost","SL.xgboost.500","SL.xgboost.300","SL.xgboost.2000",
                   "SL.xgboost.1500","SL.xgboost.d3","SL.xgboost.d5", "SL.xgboost.d6",
                   "SL.xgboost.gau","SL.xgboost.shrink.15","SL.xgboost.shrink.2",
-                  "SL.xgboost.shrink.05","SL.xgboost.shrink.25")
+                  "SL.xgboost.shrink.05","SL.xgboost.shrink.25",
+                  "SL.knn","SL.knn.100","SL.knn.50","SL.knn.25","SL.knn.5")
 algorithm_list_not_working = c("SL.biglasso","SL.extraTrees","SL.kernelKnn","SL.ksvm",
                                "SL.lda","SL.lm","SL.qda","SL.speedglm","SL.speedlm")
 # Removed because of the following error message:
@@ -267,18 +268,22 @@ eval(parse(text=paste0("k",job_id,"<-k")))
 
 cases_to_delete=NULL
 b=intersect(X[,1],Xv[,1])
+if (length(b)==0){
+  print("No cases overlap between training and validation sets\n\n")
+} else {
 for (i in 1: length(b))
 {
   a=which(X[,1]==b[i])
-  if (is.null(a)){
-    cat("No cases overlap between training and validation sets\n\n")
-    #Data=X
-  } else {
-    cases_to_delete=cbind(cases_to_delete,a)
+  print(a)
+  is.null(a)
+    cases_to_delete=as.numeric(cbind(cases_to_delete,a))
     # Here I delete the cases that overlap with the validation set
     X=X[-cases_to_delete,]
+    print(cases_to_delete)
   }
 }
+dim(X)
+dim(Xv)
 
 ## TRAINING SETS
 
@@ -354,9 +359,10 @@ if (dim(X)[2]<dim(X)[1])
   eval(parse(text=paste0("KO_selected_",job_id," <- as.numeric(sub(\"V\",\"\",names(KO_result_",job_id,"$selected)))")))
 } else {
   eval(parse(text=paste0("KO_selected_",job_id,"<-NULL")))
-  
+
 }
 algorithm_list=test_example
+print("Starting SuperLearner NOW !!")
 SL <- try(SuperLearner::SuperLearner(Y , X , newX = Xpred_norm,
                                      family=stats::binomial(),
                                      SL.library=algorithm_list,
