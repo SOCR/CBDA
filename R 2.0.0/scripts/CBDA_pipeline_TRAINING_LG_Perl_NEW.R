@@ -226,7 +226,7 @@ algorithm_list_not_working = c("SL.biglasso","SL.extraTrees","SL.kernelKnn","SL.
 
 ## THIS IS THE DEFINITION OF THE CBDA.pipeline() function used below
 CBDA.pipeline.Perl.LG <- function(job_id , label = "CBDA_package_test" , misValperc = 0 ,
-                                  M = 9000 ,  top = 1000, max_covs = 100 , min_covs = 3 ,
+                                  M = 5000 ,  top = 1000, max_covs = 100 , min_covs = 3 ,
                                   algorithm_list = c("SL.glm","SL.xgboost","SL.glmnet","SL.svm","SL.randomForest","SL.bartMachine"),
                                   workspace_directory = setwd(tempdir())) {
   
@@ -265,28 +265,29 @@ k=as.numeric(unlist(read.table(featureSet_specs,sep=",",header = FALSE,col.names
 rownames(k)<-colnames(k)<-NULL
 eval(parse(text=paste0("k",job_id,"<-k")))
 
-
 cases_to_delete=NULL
-b=intersect(X[,1],Xv[,1])
+cases_with_924_missing_data = as.numeric(c(102, 112, 230, 244, 249, 337, 418))
+# Cases that overlap between training and validation sets
+b=intersect(Xv[,1],X[,1])
+# Cases with too many missing data
+b=sort(unique(c(b)))
 if (length(b)==0){
   print("No cases overlap between training and validation sets\n\n")
 } else {
-for (i in 1: length(b))
+for (i in 1:length(b))
 {
-  a=which(X[,1]==b[i])
-  print(a)
+  a=which(Xv[,1]==b[i])
+    print(a)
   is.null(a)
-    cases_to_delete=as.numeric(cbind(cases_to_delete,a))
-    # Here I delete the cases that overlap with the validation set
-    X=X[-cases_to_delete,]
-    print(cases_to_delete)
-  }
+    cases_to_delete[i]=as.numeric(a)}
 }
-dim(X)
-dim(Xv)
+
+# Here I delete the cases in the validation set that overlap with the training  set
+Xv=Xv[-cases_to_delete,]
+print(dim(X))
+print(dim(Xv))
 
 ## TRAINING SETS
-
 # Here I save into n1 the cases left selected for training
 eval(paste0("n",job_id,"<-X[,1]"))
 # Here I save into Ytemp the output for training
@@ -324,6 +325,7 @@ if (isTRUE(length(which(is.na(Xtemp_mis) == "TRUE")) == 0)){
   Xpred_norm <- as.data.frame(scale(Xpred_mis))
 } else {
   ## DATA IMPUTATION
+  print("Data Imputation is being performed !!")
   Xtemp_imp <- missForest::missForest(Xtemp_mis, maxiter = 5)
   Xpred_imp <- missForest::missForest(Xpred_mis, maxiter = 5)
   
@@ -349,6 +351,25 @@ Data_balanced <- smotefamily::SMOTE(Data_unbalanced[,-dim(Data_unbalanced)[2]],D
 X <- Data_balanced$data[,-dim(Data_unbalanced)[2]]
 Y <- as.numeric(Data_balanced$data[,dim(Data_unbalanced)[2]])
 
+data_temp=X
+a=ifelse((is.na(data_temp)),1,0);
+print("Check if there are missing data in X training")
+print(100*sum(a)/(dim(data_temp)[1]*dim(data_temp)[2]))
+
+data_temp=Y
+a=ifelse((is.na(data_temp)),1,0);
+print("Check if there are missing data in Y training")
+print(100*sum(a)/(dim(data_temp)[1]*dim(data_temp)[2]))
+
+data_temp=Xpred_norm
+a=ifelse((is.na(data_temp)),1,0);
+print("Check if there are missing data in X validation")
+print(100*sum(a)/(dim(data_temp)[1]*dim(data_temp)[2]))
+
+data_temp=Ypred
+a=ifelse((is.na(data_temp)),1,0);
+print("Check if there are missing data in Y validation")
+print(100*sum(a)/(dim(data_temp)[1]*dim(data_temp)[2]))
 
 ## KNOCKOFF FILTER
 ## IMPORTANT  --> subjects # >> features # !!!
@@ -367,7 +388,7 @@ SL <- try(SuperLearner::SuperLearner(Y , X , newX = Xpred_norm,
                                      family=stats::binomial(),
                                      SL.library=algorithm_list,
                                      method="method.NNLS",
-                                     verbose = FALSE,
+                                     verbose = TRUE,
                                      control = list(saveFitLibrary = TRUE),
                                      cvControl = list(V=10)));
 

@@ -34,7 +34,7 @@ CBDA_Consolidation.pipeline_LG <- function(M = 9000, top = 1000, max_covs = 50 ,
     
     load(filename)
   }
-
+  print("All kj.txt loaded and k relabeled")
   #  save(list = ls(all.names = TRUE), file=filename)
   #print(M)
   #print(algorithm_list)
@@ -75,13 +75,16 @@ CBDA_Consolidation.pipeline_LG <- function(M = 9000, top = 1000, max_covs = 50 ,
                         paste0("CBDA_M",M,"_miss",misValperc,"_",label,".RData"))
   save(list = ls(all.names = TRUE), file = filename)
   
-  #print(MSE_sorted_temp)
+  print("MSE_sorted_temp")
+  print(MSE_sorted_temp)
     ## DEFINE HERE THE TOP # OF COVARIATES TO LIST in the MODEL MINING STEP
   # "top" is defined at the beginning (line 8) and represents the top MSEs to consider for
   # feature mining (ks). Each one will have a set of best features with their relative highest frequencies
+  top=100
   eval(parse(text=paste0("k_top_",top,"_temp <- NULL")))
   for (r in 1:top){
     #eval(parse(text=paste0("k_top_",top,"_temp <- c(k_top_",top,"_temp, k",MSE_sorted_temp$k_set[r],")")))
+    print(parse(text=paste0("k_top_",top,"_temp <- c(k_top_",top,"_temp,as.numeric(k",MSE_sorted_temp$k_set[r],"))")))
     eval(parse(text=paste0("k_top_",top,"_temp <- c(k_top_",top,"_temp,as.numeric(k",MSE_sorted_temp$k_set[r],"))")))
   }
   
@@ -89,7 +92,7 @@ CBDA_Consolidation.pipeline_LG <- function(M = 9000, top = 1000, max_covs = 50 ,
   #    file= \"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,
   #                       "_k",range_k,"_Light_",label,".RData\")")))
   
-  
+  print("MSE generated correctly")
   #  GENERATING THE ARRAY OF ACCURACY FOR ALL THE M SL OBJECTS
   # ACCURACY RANKING
   Accuracy_temp <- NULL
@@ -102,7 +105,7 @@ CBDA_Consolidation.pipeline_LG <- function(M = 9000, top = 1000, max_covs = 50 ,
     #eval(parse(text=paste0("k_top_",top,"_temp_Accuracy <- c(k_top_",top,"_temp_Accuracy,k",Accuracy_sorted_temp$k_set[r],")")))
     eval(parse(text=paste0("k_top_",top,"_temp_Accuracy <- c(k_top_",top,"_temp_Accuracy,as.numeric(k",Accuracy_sorted_temp$k_set[r],"))")))
     }
-  
+  print("Accuracy generated correctly")
   # Cumulative KNOCKOFF results
   KO_sub <- NULL
   for (j in 1:s) {
@@ -125,7 +128,7 @@ CBDA_Consolidation.pipeline_LG <- function(M = 9000, top = 1000, max_covs = 50 ,
     #plot(h_KO_sub,breaks=seq(min(x)-0.5, max(x)+0.5, by=1),freq=FALSE,ylab='Density (%)',xlab='Feature #',
     #     main = title_temp,ylim=c(0,max(h_KO_sub$density)))
   }
-  
+  print("KO generated correctly")
   # GENERATE DATA FOR HISTOGRAM OF THE TOP # OF COVARIATES - MSE
   #print("start h_MSE")
   eval(parse(text=paste0("x_hist = k_top_",top,"_temp")))
