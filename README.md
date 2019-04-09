@@ -2,6 +2,23 @@
 
 **Compressive Big Data Analytics (CBDA)**
 
+Table of contents
+=================
+
+<!--ts-->
+   * [Table of contents](#table-of-contents)
+   * [Overview](#overview)
+   * [Resources](#r_package)
+   * [Usage](#installation)
+   * [Contact](#vignettes)
+   * [Acknowledgments](#acknowledgments)
+   * [References](#references)
+<!--te-->
+
+
+Overview
+========
+
 The theoretical foundations of Big Data Science are not fully developed, yet. The CBDA project investigates a new Big Data theory for high-throughput analytics and model-free Inference. 
 Specifically, we explore the core principles of distribution-free and model-agnostic methods for scientific inference based on Big Data sets. Compressive Big Data analytics (CBDA) represents an idea that iteratively generates random (sub)samples
 from the Big Data collection, uses established techniques to develop model-based or non-parametric inference, repeats the (re)sampling and inference steps many times, and finally uses bootstrapping techniques to quantify probabilities, 
@@ -17,14 +34,16 @@ cancer treatment outcomes, and high-throughput data analytics using graphical pi
 
 A manuscript entitled ["Controlled Feature Selection and Compressive Big Data Analytics: Applications to Big Biomedical and Health Studies"](https://www.ncbi.nlm.nih.gov/pubmed/30161148) has been published on PLOS ONE Bioinformatics.
 
+R package
+=========
 The CBDA protocol has been developed in the [R environment](https://www.r-project.org), see the [CBDA R package download site on C-RAN](https://cran.r-project.org/package=CBDA) for the latest R version (currently R-3.5.1). Since a large number of smaller training sets are needed for the convergence of the protocol, we created a workflow that runs on the [LONI pipeline environment](http://pipeline.loni.usc.edu), a free platform for high performance computing that allows the simultaneous submission of hundreds of independent instances/jobs of the CBDA protocol. The methods, software, workflows, datssets and protocols developed here are publicly accessible and openly shared in our [first CBDA release](https://github.com/SOCR/CBDA/releases). 
 
 The source code to run the CBDA protocol is at [source1.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.zip) or at [source2.zip](https://github.com/SOCR/CBDA/archive/v0.1-alpha.tar.gz).
 
-The CBDA protocol steps are illustrated in **Figure 1**. 
+The CBDA protocol steps are illustrated in ![Figure](https://user-images.githubusercontent.com/18661302/30587406-0c2edf2c-9d01-11e7-8cef-45f3595ade65.png). 
 
-
-## CBDA R Package Installation
+Installation
+============
 The version 1.0.0 of the CBDA package can be downloaded and installed with the following command:
 ```{r Installation of the CBDA package from CRAN, eval = FALSE}
 install.packages("CBDA",repos = 'https://cran.r-project.org/')
@@ -35,7 +54,8 @@ The historical CBDA stats (since publication in April 16 2018 on CRAN) are shown
 
 A comparison with some other similar packages for the month of November 2018 is shown below. ![figure0](https://github.com/SOCR/CBDA/blob/master/Images/CBDA_stats_comparison_Nov2018.jpeg)
 
-
+Vignettes
+=========
 The documentation and vignettes, as well as the source and binary files can be found on  [CRAN](https://cran.r-project.org/web/packages/CBDA/index.html). 
 The [binary](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.zip) and the  [source](https://github.com/SOCR/CBDA/releases/download/1.0.0/CBDA_1.0.0.tar.gz) files for the CBDA R package can also be downloaded from our [Github repository](https://github.com/SOCR/CBDA/releases) and install it via the following commands.
 
@@ -53,10 +73,14 @@ The necessary packages to run the CBDA algortihm are installed automatically at 
 ![ipaktable](https://user-images.githubusercontent.com/18661302/36685272-d55b23c0-1af0-11e8-9479-528ef2dfacf6.JPG){:width="90%"}
 ![figure1](https://user-images.githubusercontent.com/18661302/30587406-0c2edf2c-9d01-11e7-8cef-45f3595ade65.png).
 
-## Acknowledgments
+Acknowledgments
+===============
 This work is supported in part by NIH grants [U54 EB020406](http://bd2k.loni.usc.edu/), [P20 NR015331](www.socr.umich.edu/CSCD), [P50 NS091856](http://udallpd.umich.edu/), [P30 DK089503](http://mmoc.med.umich.edu/), [P30AG053760](https://alzheimers.med.umich.edu), [UL1TR002240](https://www.michr.umich.edu), and NSF grants [1734853](http://brain-life.org/), [1636840](http://neurosciencenetwork.org/), [1416953](http://distributome.org), [0716055](http://socr.umich.edu) and [1023115](http://distributome.org). Students, trainees, scholars, and researchers from SOCR, BDDS, MNORC, MIDAS, MADC, MICHR, and the broad R-statistical computing community have contributed ideas, code, and support.
 
-## References
+References
+==========
+
+* [PMID:30161148](https://www.ncbi.nlm.nih.gov/pubmed/30161148)
 * [PMID:26998309](https://www.ncbi.nlm.nih.gov/pubmed/26998309)
 * [PMID:26918190](https://www.ncbi.nlm.nih.gov/pubmed/26918190)
 * [CBDA R package](https://cran.r-project.org/package=CBDA)
