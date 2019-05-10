@@ -1,5 +1,7 @@
 # CBDA
 
+<a href="http://socr.umich.edu/HTML5/CBDA/"><img align="middle" src="https://raw.githubusercontent.com/SOCR/CBDA/master/Images/CBDA_logo.png"></a>
+
 **Compressive Big Data Analytics (CBDA)**
 
 Table of contents
