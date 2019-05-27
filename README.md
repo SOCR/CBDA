@@ -10,9 +10,9 @@ Table of contents
 <!--ts-->
    * [Table of contents](#table-of-contents)
    * [Overview](#overview)
-   * [Resources](#r_package)
-   * [Usage](#installation)
-   * [Contact](#vignettes)
+   * [R package](#r_package)
+   * [Installation](#installation)
+   * [Vignettes](#vignettes)
    * [Acknowledgments](#acknowledgments)
    * [References](#references)
 <!--te-->
