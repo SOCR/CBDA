@@ -10,7 +10,7 @@ Table of contents
 <!--ts-->
    * [Table of contents](#table-of-contents)
    * [Overview](#overview)
-   * [R package](#r_package)
+   * [R package](#r-package)
    * [Installation](#installation)
    * [Vignettes](#vignettes)
    * [Acknowledgments](#acknowledgments)
