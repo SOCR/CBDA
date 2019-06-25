@@ -1,0 +1,97 @@
+---
+title: "Random Forest Variable Importance"
+author: "Andrew Soncrant"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/GitHub/CBDA/Pipeline/DISTRIBUTED/BINOMIALdataset/TEST")
+library(gridExtra)
+library(ggplot2)
+```
+
+## Overview
+
+Here we look to simulate the CBDA workflow, testing out a Random forest-based variable importance method, designed to be less susceptible to missing data ^[1]^. The methodology is as follows :
+
+1. Specify the number of times to sample from the data (we use 1000 iterations)
+2. Specify whether to sample from rows, columns, or both
+3. Specify the percentage range of rows, columns, or both to sample at each iteration
+4. At each iteration
+
+  + Sample randomly a number of rows/columns from the specified range
+  + Sample from rows/columns the previously selected number of rows/columns
+  + On this subset, perform the Random Forest method
+  + Identify the most important features
+  + Increase the "selected" count for these features by 1
+  
+5. Move on to next iteration
+
+We perform this technique on a number of manually generated datasets, that is, we know beforehand what featues are signal, and which are noise. Each data set has 10 signal columns, with the rest noise. The dimensions of these datasets are: 300x300, 300x100, 300x1500. 
+
+We perform 3 different experiments, each one sampling in a different way:
+
+  + All rows, all columns (only perform one iteration)
+  + Columns only: 5-15% and 15-30%
+  + Rows only: 30-60% and 60-80%
+  
+  
+## Experiment 1: All rows/columns
+
+Here we plot the results of performing the Random Forest method on all three datasets, in their entirety. As we can see, performing this method on the full data set does a pretty good job identifying features, and not surprisingly, performance drops as the dataset gets larger. 
+
+```{r, echo = F}
+load("RFvarimp.Rdata")
+grid.arrange(exp1_1.plot, exp1_2.plot, exp1_3.plot, ncol = 3)
+```
+
+## Experiment 2
+
+### 5-15% Columns
+
+Here we sample from 5-15% of the columns of the dataset at each iteration. We plot the results below. We notice that for the two smaller data sets, our methodology of sampling many times places just as many features in the top 20 (in terms of importance) as does using the entire dataset all at once. However, performance on the larger dataset (300x1500) drops considerably.
+
+```{r, echo = F}
+load("RFvarimp.Rdata")
+grid.arrange(exp2_1a.plot, exp2_2a.plot, exp2_3a.plot, ncol = 3)
+```
+
+
+### 15-30% Columns
+
+Here we perform the same experiment as above, but instead sample from 15-30% of columns. Oddly, selecting more columns from the data seems to diminish performance. 
+
+```{r, echo = F}
+load("RFvarimp.Rdata")
+grid.arrange(exp2_1b.plot, exp2_2b.plot, exp2_3b.plot, ncol = 3)
+```
+
+## Experiment 3
+
+### 30-60% Rows
+
+We sample 30-60% of the rows (include all columns) at each iteration. We notice two things: sampling rows doesn't seem to impact our methodology, and that the method is picking the same features very frequently (noted by the width of bars in the left and middle plots).
+
+```{r, echo = F}
+load("RFvarimp.Rdata")
+grid.arrange(exp3_1a.plot, exp3_2a.plot, exp3_3a.plot, ncol = 3)
+```
+
+### 60-80% Rows
+
+We sample 60-80% of the rows (again including all columns) at each iteration. As expected, including even more rows, and all columns, does the best job of all our experiments, exceot of course where we included all rows and all columns.
+
+```{r, echo = F}
+load("RFvarimp.Rdata")
+grid.arrange(exp3_1b.plot, exp3_2b.plot, exp3_3b.plot, ncol = 3)
+```
+
+
+## Conclusion
+
+There is reason to believe that our methodology of repeatedly sampling from rows and columns can yield promising results. Our results, however, seem to suggest that an increase in iterations may improve the accuracy when looking to extract information from very large datasets. The next step in this process: sample from rows and columns at the same time. 
+
+
+## References
+1. https://link.springer.com/article/10.1007/s11222-012-9349-1

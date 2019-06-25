@@ -1,0 +1,129 @@
+---
+title: "CBDA-SL and Knockoff Filter Results on a AD HOC Binomial Dataset - 9000 jobs"
+author: "Simeone Marino"
+date: "December 24, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Some useful information
+
+This is a summary of a set of 30 experiments I ran on Cranium using a single pipe workflow file that performs 3000 independent jobs, each one with the CBDA-SL and the knockoff filter feature mining strategies.
+Each experiments is uniquely identified by 6 input arguments: # of jobs [M], % of missing values [misValperc], min [Kcol_min] and max [Kcol_max] % for FSR-Feature Sampling Range, min [Nrow_min] and max [Nrow_max] % for SSR-Subject Sampling Range.
+
+This document has the final results, by experiment. See <https://drive.google.com/file/d/0B5sz_T_1CNJQWmlsRTZEcjBEOEk/view?ths=true> for some general documentation of the CBDA-SL project and github <https://github.com/SOCR/CBDA> for the code [still in progress].
+The test dataset is defined as below:
+
+```{r How I generated the NULL Dataset for testing, include=TRUE}
+# Problem parameters
+n <- 300;
+p =100;
+Ytemp <- rbinom(n, 1, .5);
+
+x1 <- matrix(rpois(n*p/5, 4), nrow=n, ncol=p/5);#dim(x1);qr(x1)$rank
+x2 <- matrix(runif(n*p/5, 0.1, .99), nrow=n, ncol=p/5);#dim(x2);qr(x2)$rank
+x3 <- matrix(rnorm(n*p/5, mean=5,sd=1.5),nrow=n, ncol=p/5);#dim(x3);qr(x3)$rank
+x4 <- matrix(rnorm(n*p/5, mean=25,sd=4.5),nrow=n, ncol=p/5);#dim(x4);qr(x4)$rank
+x5 <- matrix(rbinom(n*p/5, 10, prob=0.45), nrow=n, ncol=p/5);#dim(x5);qr(x5)$rank
+
+X2 <- cbind.data.frame(Ytemp, x1, x2, x3, x4, x5)
+# Here I write the data in a text file [not executed]
+# write.table(X2,"C:/Users/simeonem/Documents/CBDA-SL/Cranium/NULL_dataset.txt",sep=",")
+# # Here I load the dataset [not executed]
+# NULL_dataset = read.csv("C:/Users/simeonem/Documents/CBDA-SL/Cranium/NULL_dataset.txt",header = TRUE)
+
+```
+
+Thus, NO feature should be extracted by both the knockoff filter and the CBDA-SL algorithms. That translates into no-spikes/flat histograms shown below. No False Discovery Rates are shown. I list the top features selected, set to 11 now.
+
+```{r Set the location of the arguments file and the workspace directory, echo=FALSE}
+arg_file = as.array('C:/Users/simeonem/Documents/CBDA-SL/Cranium/arg_Dec9.txt')
+#workspace_directory<-setwd("C:/Users/simeonem/Documents/CBDA-SL/ExperimentsNov2016/KO/Dec5/")
+workspace_directory<-c("C:/Users/simeonem/Documents/CBDA-SL/ExperimentsNov2016/NULL9000/")
+eval(parse(text=paste0("knitr::opts_knit$set(root.dir = '",workspace_directory,"')")))
+#opts_knit$set(root.dir = 'c:/Users/kwilliams/git/ProjectX')
+
+```
+```{r Read the input arguments and the dataset from the specified file, echo=FALSE}
+eval(parse(text=paste0("arguments <- read.table(arg_file, header = TRUE)")))
+```
+
+```{r Set the list of experiments to analze, echo=FALSE}
+#list_exps=1:dim(arguments)[1]; # all the experiments
+#list_exps=list_exps[-1*c(21)] # the experiments to exclude
+#list_exps = 1:12
+list_exps = c(1:6,8:12)
+```
+
+```{r Save basic info in a temp file to speed up the script while looping through the experiments, echo=FALSE}
+label=c("NULL_dataset")
+eval(parse(text=paste0("save(arguments,workspace_directory,list_exps,label,file= \"~/temp_NULL_9000.RData\")")))
+```
+
+```{r Loop through each experiment to load the workspace and generate histograms/tables, echo=FALSE}
+for (i in list_exps) {
+  print(paste("EXPERIMENT",i),quote = FALSE)
+print.table(arguments[i,])
+#print(i)
+  # print(workspace_directory)
+  # print(arguments)
+  M <-arguments[i,1]
+  misValperc <- arguments[i,2]
+  Kcol_min <- arguments[i,3]
+  Kcol_max <- arguments[i,4]
+  Nrow_min <- arguments[i,5]
+  Nrow_max <- arguments[i,6]
+  range_n <- eval(parse(text=paste0("c(\"",Nrow_min,"_",Nrow_max,"\")")))
+  range_k <- eval(parse(text=paste0("c(\"",Kcol_min,"_",Kcol_max,"\")")))
+  
+  eval(parse(text=paste0("load(\"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Light_",label,".RData\")")))
+  
+# GENERATE HISTOGRAM OF THE CUMULATIVE KNOCKOFF RESULTS FOR SINGLE EXPERIMENT
+x = KO_sub;
+eval(parse(text=paste0("h=hist(x, plot = FALSE ,breaks=seq(min(x)-0.5, max(x)+0.5, by=1))")))
+h$density = h$counts/sum(h$counts)*100
+title_temp <- c("KNOCKOFF FILTER RESULTS")
+#print(title_temp)
+plot(h,freq=FALSE,ylab='Density (%)',xlab='Feature #',main = title_temp,ylim=c(0,max(h$density)))
+
+# GENERATE HISTOGRAM OF THE TOP # OF COVARIATES FOR SINGLE EXPERIMENT
+#print(arguments[i,])
+eval(parse(text=paste0("x = k_top_",top,"_temp")))
+eval(parse(text=paste0("h=hist(k_top_",top,"_temp, plot = FALSE ,breaks=seq(min(k_top_",top,"_temp)-0.5, max(k_top_",top,"_temp)+0.5, by=1))")))
+h$density = h$counts/sum(h$counts)*100
+title_temp <- c("CBDA-SL RESULTS")
+#print(title_temp)
+plot(h,freq=FALSE,ylab='Density (%)',xlab='Feature #',main = title_temp,ylim=c(0,max(h$density)))
+#readline("Press <return to continue")
+
+top=20;
+qa <-as.data.frame(Top_features[1:top])
+names(qa) <- c("CBDA-Feature","Frequency")
+qa$Density <- 100*(qa$Frequency/sum(Top_features))
+print("TABLE with CBDA-SL & KNOCKOFF FILTER RESULTS")
+# print(c("EXPERIMENT",i))
+# print(arguments[i,])
+
+Top_Knockoff_features=sort(table(KO_sub), decreasing = TRUE)
+Top_Knockoff_features_labels <- as.numeric(names(Top_Knockoff_features)[1:top])
+qa$Knockoff <- Top_Knockoff_features_labels
+qa$KO_Density <- 100*(Top_Knockoff_features[1:top]/sum(Top_Knockoff_features))
+names(qa) <- c("CBDA","Frequency","Density","Knockoff","Density")
+top=11; # how many top rows to show and use to calculate FDRs
+print(qa[1:top,], right = FALSE, row.names = FALSE)
+FDR_CBDA <- 100*(1 - sum(!is.na(match(qa$CBDA[1:top],nonzero)))/top)
+FDR_KO <- 100*(1 - sum(!is.na(match(qa$Knockoff[1:top],nonzero)))/top)
+a1=round(FDR_CBDA,digits=3)
+a2=round(FDR_KO,digits=3)
+#print(paste("False Discovery Rate for CBDA = ",a1,"%"),quote = FALSE)
+#writeLines(c("False Discovery Rate for CBDA [%]",a1))
+#print(paste("False Discovery Rate for KNOCKOFF FILTER = ",a2,"%"),quote = FALSE)
+rm(list = ls())
+eval(parse(text=paste0("load(\"~/temp_NULL_9000.RData\")")))
+cat("\n\n\n\n\n\n")
+}
+```
+

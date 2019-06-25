@@ -1,0 +1,591 @@
+---
+title: "CBDA-SL and Knockoff Filter Results on the ADNI Dataset, 9000 jobs x 2 experiment - Accuracy as ranking metric"
+author: "Simeone Marino, Ivo Dinov, Jiachen Xu"
+date: "`r format(Sys.time(), '%b %d %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Some useful information
+
+This is a summary of a set of 1 experiments using a LONI pipeline workflow file that performs 3000 independent jobs, each one with the CBDA-SL and the knockoff filter feature mining strategies.
+Each experiments has a total of 9000 jobs and is uniquely identified by 6 input arguments: # of jobs [M], % of missing values [misValperc], min [Kcol_min] and max [Kcol_max] % for FSR-Feature Sampling Range, min [Nrow_min] and max [Nrow_max] % for SSR-Subject Sampling Range.
+
+This document has the final results, by experiment. See <https://drive.google.com/file/d/0B5sz_T_1CNJQWmlsRTZEcjBEOEk/view?ths=true> for some general documentation of the CBDA-SL project and github <https://github.com/SOCR/CBDA> for some of the code.
+
+```{r Loading the Binomial_5_new Dataset, include=FALSE, echo=FALSE}
+# # Here I load the dataset [not executed]
+# Data = read.csv("C:/Users/simeonem/Documents/CBDA-SL/ExperimentsNov2016/Binomial/Binomial_5/Binomial_dataset_5.txt",header = TRUE)
+
+```
+
+Features selected by both the knockoff filter and the CBDA-SL algorithms are shown as spikes in the histograms shown below. I list the top features selected, set to 15 here.
+
+```{r Set the location of the arguments file and the workspace directory, include=FALSE}
+arg_file = as.array('C:/Users/simeonem/Documents/CBDA-SL/Cranium/arg_Binomial_new.txt')
+#workspace_directory<-setwd("C:/Users/simeonem/Documents/CBDA-SL/ExperimentsNov2016/KO/Dec5/")
+#workspace_directory<-c("C:/Users/simeonem/Documents/CBDA-SL/ExperimentsNov2016/Binomial9000/Binomial_5/n300p100")
+workspace_directory<-c("C:/Users/simeonem/Documents/CBDA-SL/ExperimentsNov2016/Binomial9000/Jiachen")
+eval(parse(text=paste0("knitr::opts_knit$set(root.dir = '",workspace_directory,"')")))
+#print(getwd())
+library("caret")
+#opts_knit$set(root.dir = 'c:/Users/kwilliams/git/ProjectX')
+
+```
+```{r Read the input arguments and the dataset from the specified file, include=FALSE}
+eval(parse(text=paste0("arguments <- read.table(arg_file, header = TRUE)")))
+```
+
+```{r Set the list of experiments to analze, echo=FALSE}
+#list_exps=1:dim(arguments)[1]; # all the experiments
+#list_exps=list_exps[-1*c(21)] # the experiments to exclude
+list_exps = c(2)
+#list_exps = c(1:9)
+```
+
+```{r Save basic info in a temp file to speed up the script while looping through the experiments, echo=FALSE}
+#label=c("Binomial_dataset_1_new")
+label=c("ADNI_MN4_balanced")
+#nonzero=c(10,20,30,40,50,60,70,80,90,100)
+#nonzero=c(1,30,60,100,130,160,200,230,260,300)
+#nonzero=c(1,100,200,300,400,500,600,700,800,900)
+#nonzero=c(1,100,200,400,600,800,1000,1200,1400,1500)
+eval(parse(text=paste0("save(arguments,workspace_directory,list_exps,label,file= \"~/temp_ADNI_MN4_balanced.RData\")")))
+#print(getwd())
+```
+
+```{r Loop through each experiment to load the workspace and generate histograms/tables, echo=FALSE}
+for (i in list_exps) {
+  print(paste("EXPERIMENT",i),quote = FALSE)
+print.table(arguments[i,])
+#print(i)
+  # print(workspace_directory)
+  # print(arguments)
+  M <-arguments[i,1]
+  misValperc <- arguments[i,2]
+  Kcol_min <- arguments[i,3]
+  Kcol_max <- arguments[i,4]
+  Nrow_min <- arguments[i,5]
+  Nrow_max <- arguments[i,6]
+  range_n <- eval(parse(text=paste0("c(\"",Nrow_min,"_",Nrow_max,"\")")))
+  range_k <- eval(parse(text=paste0("c(\"",Kcol_min,"_",Kcol_max,"\")")))
+  
+  eval(parse(text=paste0("load(\"",workspace_directory,"/CBDA_SL_M",M,"_miss",misValperc,"_n",range_n,"_k",range_k,"_Light_",label,".RData\")")))
+  #nonzero=c(1,30,60,100,130,160,200,230,260,300)
+
+#  print(dim(Ypred))
+# ## MSE GENERATION
+#   sum=0
+#   for (j in 1:M) {
+#     for(s in 1:length(Ypred)) {
+#       ## This checks first if the TYPE of the prediction object SL_Pred is NOT a double (which means that
+#       ## the prediction step worked in the previous module. If it is NOT a double, the MSE is calculated
+#       ## as the mean of the sum of the square of the difference between the prediction and the data to predict.
+#       # If the SL_Pred is a double, SL_Pred_j is assigned to its MSE (very high value).
+#       eval(parse(text=paste0("ifelse(typeof(SL_Pred_",j,") != \"double\",
+#                              sum <- sum+sum(Ypred[",s,"] - SL_Pred_",j,"$pred[",s,"])^2,sum <- SL_Pred_",j,")")))
+#       ## This step makes the final calculation of the MSE and it labels it with a j --> MSE_j
+#       eval(parse(text=paste0("MSE_",j," <- sum/length(Ypred)")))
+#       ## This resets the sum to 0 for the next MSE calculation
+#       sum = 0;
+#       }
+#     }
+
+  #  GENERATING THE ARRAY OF MSE FOR ALL THE M SL OBJECTS
+  MSE=0;
+  for (j in 1:M) {
+    eval(parse(text=paste0("MSE[j] <- MSE_",j)))
+  }
+
+  # MSE RANKING
+  #for (s in seq(10,M,M/10)){
+  s=M;
+  MSE_temp <- NULL
+  MSE_sorted_temp <- NULL
+  MSE_temp <- data.frame(mse=MSE[1:s],k_set=1:s)
+  MSE_sorted_temp <- MSE_temp[order(-MSE_temp$mse),]
+
+  # s=9000;
+  # MSE_temp <- NULL
+  # MSE_sorted_temp <- NULL
+  # MSE_temp <- data.frame(mse=MSE[1:s],k_set=1:s)
+  # MSE_sorted_temp <- MSE_temp[order(MSE_temp$mse),]
+
+
+  ## DEFINE HERE THE TOP # OF COVARIATES TO LIST in the MODEL MINING STEP
+  # "top" is defined at the beginning (line 8) and represents the top MSEs to consider for
+  # feature mining (ks). Each one will have a set of best features with their relative highest frequencies
+  top=2000
+  eval(parse(text=paste0("k_top_",top,"_temp <- NULL")))
+  for (r in 1:top){
+    eval(parse(text=paste0("k_top_",top,"_temp <- c(k_top_",top,"_temp, k",MSE_sorted_temp$k_set[r],")")))
+  }
+
+# Cumulative KNOCKOFF results
+  KO_sub <- NULL
+  for (j in 1:M) {
+    eval(parse(text=paste0("KO_sub <- c(KO_sub,KO_selected_",j,")")))
+  }
+
+#  print(dim(Xpred))
+#nonzero=c(10,20,30,40,50,60,70,80,90,100)
+#nonzero=c(1,30,60,100,130,160,200,230,260,300)
+#nonzero=c(1,100,200,300,400,500,600,700,800,900)
+#nonzero=c(1,100,200,400,600,800,1000,1200,1400,1500)
+#print(nonzero)
+
+ 
+# GENERATE HISTOGRAM OF THE CUMULATIVE KNOCKOFF RESULTS FOR SINGLE EXPERIMENT
+x = KO_sub;
+eval(parse(text=paste0("h=hist(x, plot = FALSE ,breaks=seq(min(x)-0.5, max(x)+0.5, by=1))")))
+h$density = h$counts/sum(h$counts)*100
+title_temp <- c("KNOCKOFF FILTER RESULTS")
+#print(title_temp)
+plot(h,freq=FALSE,ylab='Density (%)',xlab='Feature #',main = title_temp,ylim=c(0,max(h$density)))
+
+k_top_accuracy <- NULL
+k_top_MSE <- NULL
+
+# GENERATE HISTOGRAM OF THE TOP # OF COVARIATES FOR SINGLE EXPERIMENT - MSE
+x <- eval(parse(text=paste0("x = k_top_",top,"_temp")))
+eval(parse(text=paste0("h=hist(k_top_",top,"_temp, plot = FALSE ,breaks=seq(min(k_top_",top,"_temp)-0.5, max(k_top_",top,"_temp)+0.5, by=1))")))
+h$density = h$counts/sum(h$counts)*100
+title_temp <- c("CBDA-SL RESULTS")
+#print(title_temp)
+plot(h,freq=FALSE,ylab='Density (%)',xlab='Feature #',main = title_temp,ylim=c(0,max(h$density)))
+#readline("Press <return to continue")
+
+# RETRIEVE AND SAVE THE LABELS OF THE TOP [BEST] FEATURES
+ ADNI_MN4_balanced = read.csv("ADNI_dataset.txt",header = TRUE)
+ #print(dim(Binomial_1_new))
+cols_to_eliminate=c(1)
+  BEST=20;
+  eval(parse(text=paste0("Top_features=sort(table(k_top_",top,"_temp), decreasing = TRUE)")))
+  Top_features_labels <- names(ADNI_MN4_balanced[-cols_to_eliminate])[as.numeric(names(Top_features))]
+  eval(parse(text=paste0("Top_",BEST,"_features_labels <- names(ADNI_MN4_balanced[-cols_to_eliminate])[as.numeric(names(Top_features)[1:",BEST,"])]")))
+  # eval(parse(text=paste0("print(Top_",BEST,"_features_labels)")))
+  # eval(parse(text=paste0("print(Top_features[1:",BEST,"])")))
+top=15; # how many top rows to show and use to either calculate FDRs or proceed to the final step
+qa <-as.data.frame(Top_features[1:top])
+names(qa) <- c("CBDA","Frequency")
+qa$Density <- 100*(qa$Frequency/sum(Top_features))
+names(qa) <- c("CBDA","Frequency","Density")
+print("TABLE with CBDA-SL & KNOCKOFF FILTER RESULTS")
+#print(qa[1:top,], right = FALSE, row.names = FALSE)
+print(c("EXPERIMENT",i))
+# print(arguments[i,])
+
+Top_Knockoff_features=sort(table(KO_sub), decreasing = TRUE)
+Top_Knockoff_features_labels <- as.numeric(names(Top_Knockoff_features)[1:top])
+qa$Knockoff <- Top_Knockoff_features_labels
+qa$KO_Density <- 100*(Top_Knockoff_features[1:top]/sum(Top_Knockoff_features))
+names(qa) <- c("CBDA","Frequency","Density","Knockoff","Density")
+print(qa[1:top,], right = FALSE, row.names = FALSE)
+
+eval(parse(text=paste0("ADNI_MN4_balanced_exp_",i,"<-qa")))
+#eval(parse(text=paste0("save(Binomial_5_new_exp_",i,",arguments,workspace_directory,list_exps,label,file= \"~/Binomial_5_new_exp_",i,".RData\")")))
+eval(parse(text=paste0("save(ADNI_MN4_balanced_exp_",i,",arguments,workspace_directory,list_exps,label,file= \"ADNI_MN4_balanced_exp_",i,".RData\")")))
+# print(q)
+rm(list = ls())
+eval(parse(text=paste0("load(\"~/temp_ADNI_MN4_balanced.RData\")")))
+cat("\n\n\n\n\n\n")
+}
+# http://rpubs.com/simeonem/ADNI_MN3_top50_exp1
+# 4  28 8  7  63 47 45 62 46 35
+# http://rpubs.com/simeonem/ADNI_MN3_accuracy_top50_10features_exp2
+# c(4,  8 , 1,  7  ,56, 6 , 21, 60 ,63, 17) [top 50] 
+# c(4 , 7,  9 , 18, 46, 60, 51 ,40, 37 ,8) [top 500]
+# c(4, 40, 25,  9 ,51, 42, 18, 16, 46, 27) [ top 2000]
+```
+
+```{r GENERATE THE COMBINED TABLE OF RESULTS ACROSS EXPERIMENTS, echo=FALSE}
+eval(parse(text=paste0("load(\"~/temp_ADNI_MN4_balanced.RData\")")))
+ADNI_MN4_balanced_ALL <- NULL
+for (i in list_exps) {
+  eval(parse(text=paste0("load(\"ADNI_MN4_balanced_exp_",i,".RData\")")))
+  eval(parse(text=paste0("ADNI_MN4_balanced_ALL <- rbind(ADNI_MN4_balanced_ALL,ADNI_MN4_balanced_exp_",i,")")))
+}
+eval(parse(text=paste0("save(ADNI_MN4_balanced_ALL,arguments,workspace_directory,list_exps,label,file= \"ADNI_MN4_balanced_exps_combined.RData\")")))
+
+## This step orders all the entries across the experiments by the first Density column [3],
+## i.e. CBDA density (in decreasing order), then CBDA column [1]
+ADNI_MN4_balanced_ALL_temp <- ADNI_MN4_balanced_ALL[with(ADNI_MN4_balanced_ALL, order(-Density, CBDA)), ];
+names(ADNI_MN4_balanced_ALL_temp)[3]<-c("DensityCBDA")
+names(ADNI_MN4_balanced_ALL_temp)[5]<-c("DensityKO")
+BEST <- 15
+w1 <- c(1:BEST)
+w2 <- c(1:BEST)
+
+ADNI_MN4_balanced_ALL_temp$CBDA <- as.numeric(as.character(ADNI_MN4_balanced_ALL_temp$CBDA))
+
+#print(c(Binomial_5_new_ALL_temp$CBDA[w1],Binomial_5_new_ALL_temp$Knockoff[w2]))
+
+a10 <- unique(c(ADNI_MN4_balanced_ALL_temp$CBDA[w1],ADNI_MN4_balanced_ALL_temp$Knockoff[w2]))
+print("Top Features Selected across multiple experiments,shared between CBDA-SL and Knockoff filter")
+print(a10)
+
+
+# dataset_file=c("Binomial_dataset_5.txt")
+# Data = read.csv(dataset_file, header = TRUE)
+# cols_to_eliminate=c(1:8,9,11:12,14:39,96:98,99,107:110,303,310,342,346,349,353,389,396)
+# print(names(Data[-cols_to_eliminate])[a10])
+```
+
+The features listed above are then used to run a final analysis applying both the CBDA-SL and the knockoff filter. The ONLY features used for analysis are the ones listed above. 
+A final summary of the accuracy of the overall procedure is determined by using the CDBA-SL object on the subset of subjects held off for prediction. The predictions are then used to generate the confusion matrix.
+We basically combine the CBDA-SL & Knockoff Filter algorithms to first select the top features during the first round. Then, the second stage uses the top features to run a final predictive modeling step that can ultimately be tested for accuracy, sensitivity,.....
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#Set the list of packages/libraries to install/include (done through the ipak.R function)
+packages <- c("ggplot2", "plyr", "colorspace","grid","data.table","VIM","MASS","Matrix",
+              "lme4","arm","foreach","glmnet","class","nnet","mice","missForest",
+              "calibrate","nnls","SuperLearner","plotrix","TeachingDemos","plotmo",
+              "earth","parallel","splines","gam","mi",
+              "BayesTree","e1071","randomForest", "Hmisc","dplyr","Amelia","bartMachine",
+              "knockoff","caret","smotefamily","FNN")
+
+## ipak function below: install (if missing) and load (if installed) multiple R packages
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg))
+    install.packages(new.pkg, dependencies = TRUE, repos='http://cran.rstudio.com/')
+  sapply(pkg, require, character.only = TRUE)
+}
+
+#install.packages('package_name', dependencies=TRUE, repos='http://cran.rstudio.com/')
+ipak(packages)
+load("ADNI_MN4_balanced_exp_2.RData")
+qa <- ADNI_MN4_balanced_exp_2
+ADNI_MN4_balanced = read.csv("ADNI_dataset.txt",header = TRUE)
+Data = ADNI_MN4_balanced
+#arguments = read.table(arg_file, header = TRUE)
+
+# Output -> ADNI[,8]
+Ytemp <- Data[,8] # col 9
+# This step merges the class LMCI with MCI, making only 3 categories for classification - MN3
+Ytemp[which(Ytemp == "LMCI")] <- c("MCI")
+Ytemp <- droplevels(Ytemp)
+original_names_Data <- names(Data)
+
+## DATA CLEANING -- THIS STEP IS DATA DEPENDENT
+#cols_to_eliminate=1
+cols_to_eliminate <- c(1:6,8:11,17,20:22) # this includes the output column
+Xtemp <- as.data.frame(Data[-cols_to_eliminate])
+Xtemp$subjectSex <- as.numeric(Xtemp$subjectSex == "F")
+original_names_Xtemp <- names(Xtemp)
+
+# SET THE SAME NAMES/LABELS FOR THE X dataset
+names(Xtemp) <- 1:dim(Xtemp)[2]
+
+## SAMPLE THE PREDICTION DATASET -- THIS STEP IS DATA INDEPENDENT
+## This ensures reproducibility of the analysis
+set.seed(123456789)
+alpha = 0.2
+## The fraction alpha of data/patients to use for prediction could be passed 
+# as an input argument as well. Since in this dataset we have 4 categories,
+# we divide eqully the cases in the prediction dataset
+# This is the # of cases to hold off for validation
+n_temp <- round(alpha*dim(Xtemp)[1])
+a <- table(Ytemp)
+feat_frac <- a/sum(a)
+# This sets aside # of cases to hold off for validation proportional to the original dataset fraction
+q_AD = sample(which(Ytemp == "AD"),round(feat_frac[1]*n_temp))
+q_MCI = sample(which(Ytemp == "MCI"),round(feat_frac[2]*n_temp))
+q_Normal = sample(which(Ytemp == "Normal"),round(feat_frac[3]*n_temp))
+q <- c(q_AD, q_MCI, q_Normal)
+q <- sort(q)
+
+# Prediction set
+Xpred <- Xtemp[q,] # define the feature set for prediction (renamed Xpred) [not used in the training/learning]
+Ypred <- Ytemp[q] # define the output for prediction (renamed Ypred) [not used in the training/learning]
+
+k <- qa$CBDA[1:15]
+#k <- qa$Knockoff[1:8]
+#k <- c(4,7,8,60)
+#k <- c(4,7,8)
+print(k)
+
+Ytemp_AD = as.numeric(Ytemp == "AD")
+#Ytemp_LMCI = as.numeric(Ytemp == "LMCI")
+Ytemp_MCI = as.numeric(Ytemp == "MCI")
+Ytemp_Normal = as.numeric(Ytemp == "Normal")
+
+# Balancing the samples, if necessary
+n_all <- 1:length(Ytemp)
+n_sub <- n_all[-q]
+n_sub <- sort(n_sub)
+# lambda=runif(1,Nrow_min/100,Nrow_max/100);
+# a <- table(Ytemp[-q])
+# 
+# n_tot <- round(lambda*sum(a))
+# n_AD_row <- round(lambda*a[1])
+# #n_LMCI_row <- min(round(lambda*rbind(a[2],sum(a[c(1,3,4)]))))
+# n_MCI_row <- round(lambda*a[2])
+# n_Normal_row <- round(lambda*a[3])
+# # # Randomly select patients for prediction, balancing with SMOTE
+# n1_AD = sample(which(Ytemp_AD[n_sub]==1),n_AD_row)
+# n2_AD = sample(which(Ytemp_AD[n_sub]==0),n_tot - n_AD_row)
+# n_AD <- c(n1_AD , n2_AD)
+# 
+# n1_MCI = sample(which(Ytemp_MCI[n_sub]==1),n_MCI_row)
+# n2_MCI = sample(which(Ytemp_MCI[n_sub]==0),n_tot - n_MCI_row)
+# n_MCI <- c(n1_MCI , n2_MCI)
+# 
+# n1_Normal = sample(which(Ytemp_Normal[n_sub]==1),n_Normal_row)
+# n2_Normal = sample(which(Ytemp_Normal[n_sub]==0),n_tot - n_Normal_row)
+# n_Normal <- c(n1_Normal , n2_Normal)
+
+i_exp = 2
+#misValperc <- arguments[i_exp,2]
+misValperc <- 0
+# Xtemp_AD <- Xtemp[n_sub[n_AD],k]
+# #Xtemp_LMCI <- Xtemp[n_sub[n_LMCI],k]
+# Xtemp_MCI <- Xtemp[n_sub[n_MCI],k]
+# Xtemp_Normal <- Xtemp[n_sub[n_Normal],k]
+Xtemp_AD <- Xtemp[n_sub,k]
+#Xtemp_LMCI <- Xtemp[n_sub[n_LMCI],k]
+Xtemp_MCI <- Xtemp[n_sub,k]
+Xtemp_Normal <- Xtemp[n_sub,k]
+
+print(dim(Xtemp_AD))
+print(dim(Xtemp_MCI))
+print(dim(Xtemp_Normal))
+
+# Here we pass ONLY the subset of columns [,k] for imputation and scaling of Xpred [validation/preditcion]
+Xpred_mis <- Xpred[,k]
+# Here I impute the missing data with the function missForest
+Xtemp_imp_AD <- missForest(Xtemp_AD, maxiter = 1)
+#Xtemp_imp_LMCI <- missForest(Xtemp_LMCI, maxiter = 5)
+Xtemp_imp_MCI <- missForest(Xtemp_MCI, maxiter = 1)
+Xtemp_imp_Normal <- missForest(Xtemp_Normal, maxiter = 1)
+
+Xpred_imp <- missForest(Xpred_mis, maxiter = 1)
+
+## DATA NORMALIZATION of the sampled matrix without Group and Sex
+## This step can be generalized if the data is formatted RAW,
+# with categorical variables as binary or strings (see commented out example below)
+# a1 = which(names(Xtemp_imp$ximp) == "Group")
+# a2 = which(names(Xtemp_imp$ximp) == "Sex")
+# cont = 1:length(Xtemp_imp$ximp)
+# cont <- cont[-1*c(a1,a2)]
+# # DATA NORMALIZATION if IMPUTATION IS PERFORMED
+#Xnorm_ALL <- as.data.frame(scale(Xtemp_imp$ximp))
+Xtemp_norm_AD <- as.data.frame(scale(Xtemp_imp_AD$ximp))
+#Xtemp_norm_LMCI <- as.data.frame(scale(Xtemp_imp_LMCI$ximp))
+Xtemp_norm_MCI <- as.data.frame(scale(Xtemp_imp_MCI$ximp))
+Xtemp_norm_Normal <- as.data.frame(scale(Xtemp_imp_Normal$ximp))
+
+Xpred_norm <- as.data.frame(scale(Xpred_imp$ximp))
+
+# STEPS 5 and 6 ADD LIBRARIES
+# Specify new SL prediction algorithm wrappers 
+SL.glmnet.0 <- function(..., alpha = 0){
+  SL.glmnet(..., alpha = alpha)
+} # ridge penalty
+
+SL.glmnet.0.25 <- function(..., alpha = 0.25){
+  SL.glmnet(..., alpha = alpha)
+}
+
+SL.glmnet.0.50 <- function(..., alpha = 0.50){
+  SL.glmnet(..., alpha = alpha)
+}
+
+SL.glmnet.0.75 <- function(..., alpha = 0.75){
+  SL.glmnet(..., alpha = alpha)
+}
+
+SL.gam.1<-function(...,control=gam.control(deg.gam=1)){
+  SL.gam(...,control=control)
+}
+SL.gam.3<-function(...,control=gam.control(deg.gam=3)){
+  SL.gam(...,control=control)
+}
+SL.gam.4<-function(...,control=gam.control(deg.gam=4)){
+  SL.gam(...,control=control)
+}
+SL.gam.5<-function(...,control=gam.control(deg.gam=5)){
+  SL.gam(...,control=control)
+}
+
+create.SL.glmnet.alpha<-function(...,alpha=c(0.25,0.5,0.75))
+{
+  SL.glmnet(..., alpha=alpha)
+}
+
+## The bartMachine wrapper won't be necessary with the latest release of the SL.bartMachine.
+## It's not properly installed yet.
+
+#' Wrapper for bartMachine learner
+#'
+#' Support bayesian additive regression trees via the bartMachine package.
+#'
+#' @param Y Outcome variable
+#' @param X Covariate dataframe
+#' @param newX Optional dataframe to predict the outcome
+#' @param obsWeights Optional observation-level weights (supported but not tested)
+#' @param id Optional id to group observations from the same unit (not used
+#'   currently).
+#' @param family "gaussian" for regression, "binomial" for binary
+#'   classification
+#' @param num_trees The number of trees to be grown in the sum-of-trees model.
+#' @param num_burn_in Number of MCMC samples to be discarded as "burn-in".
+#' @param num_iterations_after_burn_in Number of MCMC samples to draw from the
+#'   posterior distribution of f(x).
+#' @param alpha Base hyperparameter in tree prior for whether a node is
+#'   nonterminal or not.
+#' @param beta Power hyperparameter in tree prior for whether a node is
+#'   nonterminal or not.
+#' @param k For regression, k determines the prior probability that E(Y|X) is
+#'   contained in the interval (y_{min}, y_{max}), based on a normal
+#'   distribution. For example, when k=2, the prior probability is 95\%. For
+#'   classification, k determines the prior probability that E(Y|X) is between
+#'   (-3,3). Note that a larger value of k results in more shrinkage and a more
+#'   conservative fit.
+#' @param q Quantile of the prior on the error variance at which the data-based
+#'   estimate is placed. Note that the larger the value of q, the more
+#'   aggressive the fit as you are placing more prior weight on values lower
+#'   than the data-based estimate. Not used for classification.
+#' @param nu Degrees of freedom for the inverse chi^2 prior. Not used for
+#'   classification.
+#' @param verbose Prints information about progress of the algorithm to the
+#'   screen.
+#' @param ... Additional arguments (not used)
+#'
+#' @encoding utf-8
+#' @export
+SL.bartMachine <- function(Y, X, newX, family, obsWeights, id,
+                           num_trees = 50, num_burn_in = 250, verbose = F,
+                           alpha = 0.95, beta = 2, k = 2, q = 0.9, nu = 3,
+                           num_iterations_after_burn_in = 1000,
+                           ...) {
+  #.SL.require("bartMachine")
+  model = bartMachine::bartMachine(X, Y, num_trees = num_trees,
+                                   num_burn_in = num_burn_in, verbose = verbose,
+                                   alpha = alpha, beta = beta, k = k, q = q, nu = nu,
+                                   num_iterations_after_burn_in = num_iterations_after_burn_in)
+  # pred returns predicted responses (on the scale of the outcome)
+  pred <- predict(model, newX)
+  # fit returns all objects needed for predict.SL.template
+  fit <- list(object = model)
+  #fit <- vector("list", length=0)
+  class(fit) <- c("SL.bartMachine")
+  out <- list(pred = pred, fit = fit)
+  return(out)
+}
+
+#' bartMachine prediction
+#' @param object SuperLearner object
+#' @param newdata Dataframe to predict the outcome
+#' @param family "gaussian" for regression, "binomial" for binary
+#'   classification. (Not used)
+#' @param Y Outcome variable (not used)
+#' @param X Covariate dataframe (not used)
+#' @param ... Additional arguments (not used)
+#'
+#' @export
+predict.SL.bartMachine <- function(object, newdata, family, X = NULL, Y = NULL,...) {
+  pred <- predict(object$object, newdata)
+  return(pred)
+}
+  SL.library <- c("SL.glm",
+                "SL.glmnet","SL.glmnet.0","SL.glmnet.0.25","SL.glmnet.0.50","SL.glmnet.0.75",
+                "SL.svm","SL.randomForest","SL.bartMachine")
+# X_AD <- Xtemp_norm_AD
+# Y_AD<- Ytemp_AD[-q]
+# X_MCI<- Xtemp_norm_MCI
+# Y_MCI<- Ytemp_MCI[-q]
+# X_Normal<- Xtemp_norm_Normal
+# Y_Normal<- Ytemp_Normal[-q]
+## This steps balances the dataset wrt the different categories,
+## using SMOTE (Synthetic Minority Oversampling TEchnique)
+X_AD_unbalanced <- as.data.frame(Xtemp_norm_AD)
+Y_AD_unbalanced <- Ytemp_AD[n_sub]
+Data_AD_unbalanced <- cbind(X_AD_unbalanced,Y_AD_unbalanced)
+#dim(Data_AD_unbalanced)
+Data_AD_balanced <- SMOTE(Data_AD_unbalanced[,-dim(Data_AD_unbalanced)[2]],Data_AD_unbalanced[,dim(Data_AD_unbalanced)[2]])
+#dim(Data_AD_balanced$data)
+X_AD <- Data_AD_balanced$data[,-dim(Data_AD_unbalanced)[2]]
+Y_AD <- as.numeric(Data_AD_balanced$data[,dim(Data_AD_unbalanced)[2]])
+
+X_MCI_unbalanced <- as.data.frame(Xtemp_norm_MCI)
+Y_MCI_unbalanced <- Ytemp_MCI[n_sub]
+Data_MCI_unbalanced <- cbind(X_MCI_unbalanced,Y_MCI_unbalanced)
+#dim(Data_MCI_unbalanced)
+Data_MCI_balanced <- SMOTE(Data_MCI_unbalanced[,-dim(Data_MCI_unbalanced)[2]],Data_MCI_unbalanced[,dim(Data_MCI_unbalanced)[2]])
+#dim(Data_MCI_balanced$data)
+X_MCI <- Data_MCI_balanced$data[,-dim(Data_MCI_unbalanced)[2]]
+Y_MCI <- as.numeric(Data_MCI_balanced$data[,dim(Data_MCI_unbalanced)[2]])
+
+X_Normal_unbalanced <- as.data.frame(Xtemp_norm_Normal)
+Y_Normal_unbalanced <- Ytemp_Normal[n_sub]
+Data_Normal_unbalanced <- cbind(X_Normal_unbalanced,Y_Normal_unbalanced)
+#dim(Data_Normal_unbalanced)
+Data_Normal_balanced <- SMOTE(Data_Normal_unbalanced[,-dim(Data_Normal_unbalanced)[2]],Data_Normal_unbalanced[,dim(Data_Normal_unbalanced)[2]])
+#dim(Data_Normal_balanced$data)
+X_Normal <- Data_Normal_balanced$data[,-dim(Data_Normal_unbalanced)[2]]
+Y_Normal <- as.numeric(Data_Normal_balanced$data[,dim(Data_Normal_unbalanced)[2]])
+
+print(dim(X_AD))
+print(dim(X_MCI))
+print(dim(X_Normal))
+dim(Xpred_norm)
+length(Ypred)
+# dim(Xtemp_norm_AD)
+# length(Y_AD)
+# dim(Xtemp_norm_MCI)
+# length(Y_MCI)
+# dim(Xtemp_norm_Normal)
+# length(Y_Normal)
+
+
+
+SL_Normal <- try(SuperLearner(Y_Normal , X_Normal , newX = Xpred_norm,
+                              family=binomial(),
+                              SL.library=SL.library,
+                              method="method.NNLS",
+                              verbose = FALSE,
+                              control = list(saveFitLibrary = TRUE),
+                              cvControl = list(V=10)));
+SL_MCI <- try(SuperLearner(Y_MCI , X_MCI , newX = Xpred_norm,
+                           family=binomial(),
+                           SL.library=SL.library,
+                           method="method.NNLS",
+                           verbose = FALSE,
+                           control = list(saveFitLibrary = TRUE),
+                           cvControl = list(V=10)));
+
+SL.library <- c("SL.glm",
+                "SL.glmnet","SL.glmnet.0","SL.glmnet.0.25","SL.glmnet.0.50","SL.glmnet.0.75",
+                "SL.svm","SL.randomForest")
+
+SL_AD <- try(SuperLearner(Y_AD , X_AD , newX = Xpred_norm,
+                          family=binomial(),
+                          SL.library=SL.library,
+                          method="method.NNLS",
+                          verbose = FALSE,
+                          control = list(saveFitLibrary = TRUE),
+                          cvControl = list(V=10)));
+
+SL_Pred <- data.frame(pred_Normal = SL_Normal$SL.predict[, 1], pred_AD = SL_AD$SL.predict[, 1],
+                      pred_MCI = SL_MCI$SL.predict[, 1])
+#Classify <- apply(SL_Pred, 1, function(xx) c("Normal","AD", "MCI")[unname(which.max(xx))])
+# SL_Pred <- data.frame(pred_Normal = SL_Normal$SL.predict[, 1], pred_AD = SL_AD$SL.predict[, 1],
+#                       pred_MCI = SL_MCI$SL.predict[, 1], pred_LMCI = SL_LMCI$SL.predict[, 1])
+Classify <- apply(SL_Pred, 1, function(xx) c("Normal","AD", "MCI")[unname(which.max(xx))])
+# Classify <- apply(SL_Pred, 1, function(xx) which.max(xx))
+# Classify <- apply(SL_Pred, 1, function(xx) max(xx))
+
+truth=Ypred; # set the true outcome to be predicted
+pred=Classify
+# pred_temp <- pred;pred_temp[which(pred_temp == "MCI/LMCI")] <- c("MCI")
+# truth_temp <- truth;truth_temp[which(truth_temp == "LMCI")] <- c("MCI")
+
+cmatrix <- confusionMatrix(pred,truth)
+print(cmatrix)
+
+```

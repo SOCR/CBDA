@@ -1,0 +1,40 @@
+---
+title: "Variable Importance"
+author: "Andrew Soncrant"
+date: "April 18, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/GitHub/CBDA/Pipeline/DISTRIBUTED/BINOMIALdataset/TEST")
+library(party)
+library(ggplot2)
+```
+# Variable Importance
+Here we compare two techniques for calculating variable importance: Random Forest with conditional inference trees, and the varImpact package in R. For both techniques, we use the Binomial dataset available on the CBDA GitHub page. We mimick the CBDA technique of sampling from the data. We perform 500 iterations, compared to thousands in CBDA. Because we perform fewer iterations, we only sample from the rows of our data set, and include all features. 
+
+
+### Random Forest Variable Importance
+
+The Random Forest method performs a slightly altered version of Random Forest than usual. Simply put, this version of RF randomly assigns observations into child nodes of trees when calculating OOB error rates. The purpose of this is to reduce the impact of missing data on our inference. After 500 simulations, we plot the results below. 
+
+```{r, echo = F}
+load("rf_varimport.Rdata")
+implot
+```
+
+### VarImpact Importance
+
+Here we use the VarImpact package (downloaded from GitHub). UNlike above, where we sampled many times from the data, here we simply call the "varImpact" function once, as it perrforms cross validation (and actually uses the superLearner function) on its own. It should be noted that the function takes quite a while to run (almost an hour). We plot the results below. 
+
+```{r, echo = F}
+load("varImpact.Rdata")
+vplot
+```
+
+### Comparison
+Compaing the two plots, we can see that the two selection methods don't select any of the same elements. While there are many potential reasons for this, the one that jumps to mind is that the Random Forest selections are based on multiple sub-samples of the data, while the varImpact selections are derived from only one pass through the entire data set. In the CBDA workflow, the varImpact would be called on every sub-sample of the data (in both n and p dimensions), and so would probably be more informative, and more in keeping with the RF method. However, it's not yet clear what impact the addition of the varImpact function will have in terms of computation time, since as mentioned the varImpact function took quite a while to run. Hopefully, limiting the size of the data in CBDA to be subjected to this function will increase the runtime.
+
+
+
