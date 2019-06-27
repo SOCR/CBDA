@@ -102,9 +102,6 @@ end_time_total=Sys.time()
 print(end_time_total-start_time_total)
 
 
-
-
-
 ## This generates a "light" Null dataset 10kx1k
 cat("GENERATNG THE NULL 10K - 1K\n\n")
 start_time_total=Sys.time()
@@ -345,12 +342,6 @@ for (i in 1:100){
 }
 end_time_total=Sys.time()
 print(end_time_total-start_time_total)
-
-
-
-
-
-
 
 
 ## This generates a "light" Null dataset 10kx1k
