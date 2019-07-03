@@ -8,7 +8,7 @@
                 <metadata>
                         <data key="__creationDateKey" value="" />
                 </metadata>
-                <dataModule id="CraniumDataSource_1" name="Cranium Data Source" posX="152" posY="123" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="cranium.loni.usc.edu" dirSource="true">
+                <dataModule id="CraniumDataSource_1" name="Cranium Data Source" posX="152" posY="123" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="cranium.loni.usc.edu">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Oct 03 17:35:29 EDT 2016" />
@@ -24,7 +24,7 @@
                                 <filetype name="File" extension="" description="Any type of data file" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://cranium.loni.usc.edu//ifs/loni/ccb/collabs/2016/CBDA_SL_2016/2018/Simeone/Datasets/CBDA2-datasets</value>
+                                <value>pipeline://cranium.loni.usc.edu//ifs/loni/ccb/collabs/2016/CBDA_SL_2016/2018/Simeone/Datasets/CBDA2-datasets/Null_dataset_10k_1k.txt</value>
                         </values>
                 </dataModule>
                 <dataModule id="LocalStorage_1" name="Local Storage" posX="149" posY="537" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="true">
@@ -43,7 +43,7 @@
                                 <filetype name="File" extension="" description="Any type of data file" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost/C:\temp</value>
+                                <value>pipeline://localhost/C:\Users\simeonem\Documents\CBDA-package\LONI\temp</value>
                         </values>
                 </dataModule>
                 <module id="ZIP_1" name="ZIP" description="To Zip a bunch of files or directories (e.g., RData files, prior to Transfer" posX="143" posY="305" sourceCode="" location="pipeline://cranium.loni.usc.edu//usr/bin/zip">
@@ -64,7 +64,7 @@
                                 </format>
                         </output>
                         <input id="ZIP_1.SpecifyInputFilesDIrectoriesToZip" name="Specify Input Files/DIrectories To Zip" required="false" enabled="true" order="2">
-                                <format type="File" cardinality="-1">
+                                <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="File" extension="" description="Any type of data file" />
                                         </fileTypes>
