@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <connections>
+                <connection source="CraniumDataSource_1.Output" sink="LocalStorage_1.Input" />
+        </connections>
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <dataModule id="CraniumDataSource_1" name="Cranium Data Source" posX="109" posY="22" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <metadata>
+                                <data key="__creationDateKey" value="Mon Oct 03 17:35:29 EDT 2016" />
+                        </metadata>
+                        <output id="CraniumDataSource_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="File" extension="" description="Any type of data file" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="File" extension="" description="Any type of data file" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://localhost/C:\Users\simeonem\Documents\Cyverse_questions.docx</value>
+                        </values>
+                </dataModule>
+                <dataModule id="LocalStorage_1" name="Local Storage" posX="105" posY="249" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="cranium.loni.usc.edu" dirDump="true">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Mon Oct 03 17:36:50 EDT 2016" />
+                        </metadata>
+                        <input id="LocalStorage_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="File" extension="" description="Any type of data file" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="File" extension="" description="Any type of data file" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://cranium.loni.usc.edu//ifshome/smarino</value>
+                        </values>
+                </dataModule>
+        </moduleGroup>
+</pipeline>
+
